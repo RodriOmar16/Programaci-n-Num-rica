@@ -396,6 +396,18 @@ public class Matriz {
 			}
 			G[f][c] = this.termIndep[f][0];
 		}
+
+		System.out.println("\n Muestra de la G Gauss");
+		for(int f=0; f<n ;f++) {
+			System.out.println("");
+			for(c=0; c<n ;c++){
+				System.out.print(G[f][c]+"\t");
+				//G[f][c] = this.matrizCoef[f][c];
+			}
+			System.out.print(" | "+G[f][c]);
+			//G[f][c] = this.termIndep[f][0];
+		}
+		
 		
 		//Comienza la eliminación
 		for(int k=0; k<n-1 ;k++) {
