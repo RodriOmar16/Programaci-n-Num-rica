@@ -56,7 +56,7 @@ public class Main {
 		for(int f=0; f<n ;f++) {
 			System.out.println("");
 			for(int c=0; c<m ;c++) {
-				System.out.print(a[f][c]+"\t");
+				System.out.print(a[f][c]+"\T");
 			}
 			System.out.println(" | "+b[f]);
 		}
