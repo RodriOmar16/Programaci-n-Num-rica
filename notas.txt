@@ -1,0 +1,17 @@
+Clase Matriz: 
+	- matriz de double a[n][m]
+	- orden:  n x m
+	- matriz de términos independientes: b[n][1] 
+Métodos_clase:
+	- cargar					LISTO
+	- mostrar					LISTO
+	- getMatrizCoef					LISTO
+	- getMatrizTermIndep				LISTO
+	- getMatrizAmpliada				LISTO
+	- rangoAmpliada(a[m][n],b[n][1])
+	- rangoCoef(a[m][n], b[n][1]);
+	- determinante(a[][], n)			LISTO
+	- condNSFactorizacion(a[][], n);
+	- factorizacionLU(a[][], b[][], n);
+	- eliminacion_gaussiana(a[][], n, b[][])
+	- gauss_jordan(a[][], n, b[][]);
