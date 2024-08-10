@@ -390,14 +390,12 @@ public class Matriz {
 		double x[] = new double[n], G[][] = new double[n][n+1], aux[][] = new double[n][1], m;
 		
 		//Copia A y B talque G = (A|b)
-		/*for(int f=0; f<n ;f++) {
+		for(int f=0; f<n ;f++) {
 			for(c=0; c<n ;c++){
 				G[f][c] = this.matrizCoef[f][c];
 			}
 			G[f][c] = this.termIndep[f][0];
-		}*/
-		
-		G = getMatrizAmpliada();
+		}
 		
 		//Comienza la eliminación
 		for(int k=0; k<n-1 ;k++) {
@@ -432,13 +430,12 @@ public class Matriz {
 				G[][] = new double[n][n+1],m;
 		
 		//Copia A y B talque G = (A|b)
-		/*for(int f=0; f<n ;f++) {
+		for(int f=0; f<n ;f++) {
 			for(c=0; c<n ;c++){
 				G[f][c] = this.matrizCoef[f][c];
 			}
 			G[f][c] = this.termIndep[f][0];
-		}*/
-		G = getMatrizAmpliada();
+		}
 				
 		//comienzo el proceso
 		for(int k=0; k<n ;k++) {
