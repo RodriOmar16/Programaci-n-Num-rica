@@ -243,7 +243,7 @@ public class Matriz {
 	}
 	
 	//Determinante de una matriz
-	//DETERMINANTE
+	
 	private double determinante(double [][]A, int n, int m, int caso,int fila){ //fila es para el desarrollo de laplace
 		double det = 0;
 		if(n==2 && m==2){	return A[0][0]*A[1][1] - A[1][0]*A[0][1]; }
@@ -268,7 +268,7 @@ public class Matriz {
 	public double detMatriz(int caso) {
 		return determinante(this.matrizCoef,this.orden[0], this.orden[1], caso, 0); 
 	}
-	//RESOLUCION DE SISTEMAS DIAGONAL
+	
 	//Devuelve la n-upla solución del sistema
 	public double[] resolucionSistDiagonal() {
 		int n = this.orden[0];
@@ -280,7 +280,6 @@ public class Matriz {
 	}
 	
 	//Devuelve la n-upla solución del Sistema Triangular superior
-	//RESOLUCION DE SISTEMAS TRIANGULARES SUPERIORES
 	public double[] resolucionSistTriangularSuperior(double A[][], int n, double b[][]) {
 		//int n = this.orden[0];
 		double x[] = new double[n];
@@ -303,7 +302,6 @@ public class Matriz {
 	}
 	
 	//Devuelve la n-upla solución del Sistema Triangular inferior
-	//RESOLUCION DE SISTEMAS TRIANGULARES INFERIORES
 	public double[] resolucionSistTriangularInferior(double A[][], int n, double b[][]) {
 		//int n = this.orden[0];
 		double x[] = new double[n];
@@ -324,13 +322,11 @@ public class Matriz {
 		return x;
 	}
 	
-	
 	public boolean condNSFactorizacion() {
 		boolean resp = true;
 		return resp;
 	}
 	
-	//FACTORIZACIÓN LU
 	//Factorización LU
 	public void factorizacionLU(){
 		int n = this.orden[0],
@@ -358,7 +354,6 @@ public class Matriz {
 			}
 		}
 	}
-	//PIVOTEO NORMAL
 	
 	//realiza pivoteo normal 
 	private double[][] pivotearNormal(double A[][], int n, int m, int k) {
@@ -381,7 +376,6 @@ public class Matriz {
 		}
 		return a;
 	}
-	//FACTORIZACION LU POR GAUSS
 	
 	//FACTORIZACION LU POR GAUSS
 	public void factorizacionLUgauss() {
@@ -411,7 +405,6 @@ public class Matriz {
 		}
 		this.L[n-1][n-1] = 1;
 	}
-	//ELIMINACION GAUSSIANA
 	
 	//ELIMINACIÓN GAUSSIANA
 	public double[] eliminacionGaussiana() {
@@ -453,7 +446,6 @@ public class Matriz {
 		
 		return x;
 	}
-	//GAUSS - JORDAN
 	
 	//GAUSS-JORDAN
 	public double[] gaussJordan(){
@@ -501,51 +493,7 @@ public class Matriz {
 	}
 	
 	//CRUT L1U
-	public double[] croutL1U() {
-		int n = this.orden[0], 
-			c;
-		double x[] 	   = new double[n],
-			   G[][]   = new double[n][n+1],
-			   aux[][] = new double[n][1],
-			   acu     = 0;
-		
-		//Copia A y B talque G = (A|b)
-		for(int f=0; f<n ;f++) {
-			for(c=0; c<n ;c++){
-				G[f][c] = this.matrizCoef[f][c];
-			}
-			G[f][c] = this.termIndep[f][0];
-		}
-		
-		//Comienza el proceso de Factorización A = L1 * U
-		for(int k=0; k<n ;k++) {
-			for(int j=k; j<=n ;j++) {
-				for(int p=0; p<k-1 ;p++) {
-					acu = acu + (G[k][p] * G[p][j]);
-				}
-				G[k][j] = G[k][j] - acu;
-				
-				for(int i=k+1; i<n ;i++) {
-					for(int p=0; p<k-1 ;p++) {
-						acu = acu + (G[k][p] * G[p][j]);
-					}
-					G[i][k] = (G[i][k] - acu)/ G[k][k]; 
-				}
-			}
-		}
-		
-		mostrarMatrizAmpliada(G, n, n);
-		
-		//uso a x como auxiliar
-		for(int f=0; f<n ;f++) {
-			aux[f][0] = G[f][n];
-		}
-		
-		//realizo Sustitucion regresiva
-		x = resolucionSistTriangularSuperior(G, n, aux);
-		
-		return x;
-	}
+	
 	
 	//CRUT LU1
 	

@@ -500,6 +500,7 @@ public class Matriz {
 		return x;
 	}
 	
+
 	//CRUT L1U
 	public double[] croutL1U() {
 		int n = this.orden[0], 
