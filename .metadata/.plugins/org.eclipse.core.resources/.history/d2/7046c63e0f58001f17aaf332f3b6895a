@@ -376,6 +376,8 @@ public class Matriz {
 		return a;
 	}
 	//FACTORIZACION LU POR GAUSS
+	
+	//FACTORIZACION LU POR GAUSS
 	public void factorizacionLUgauss() {
 		int n = this.orden[0];
 		//copiar matriz A en U
@@ -403,6 +405,8 @@ public class Matriz {
 		}
 		this.L[n-1][n-1] = 1;
 	}
+	//ELIMINACION GAUSSIANA
+	
 	//ELIMINACIÓN GAUSSIANA
 	public double[] eliminacionGaussiana() {
 		int n = this.orden[0], c;
@@ -443,6 +447,8 @@ public class Matriz {
 		
 		return x;
 	}
+	//GAUSS - JORDAN
+	
 	//GAUSS-JORDAN
 	public double[] gaussJordan(){
 		int n = this.orden[0], c;
@@ -487,6 +493,7 @@ public class Matriz {
 		
 		return x;
 	}
+	
 	//CRUT L1U
 	public double[] croutL1U() {
 		int n = this.orden[0], 
@@ -536,7 +543,7 @@ public class Matriz {
 		return x;
 	}
 	//CRUT LU1
-	public double[] croutLU1() {
+	public double[] croutL1U() {
 		int n = this.orden[0], 
 			c;
 		double x[] 	   = new double[n],

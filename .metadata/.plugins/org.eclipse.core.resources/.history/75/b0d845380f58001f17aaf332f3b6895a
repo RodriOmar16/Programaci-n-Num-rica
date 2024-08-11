@@ -301,6 +301,7 @@ public class Matriz {
 		}*/
 		return x;
 	}
+	
 	//RESOLUCION DE SISTEMAS TRIANGULARES INFERIORES
 	public double[] resolucionSistTriangularInferior(double A[][], int n, double b[][]) {
 		//int n = this.orden[0];
@@ -321,13 +322,15 @@ public class Matriz {
 		}
 		return x;
 	}
-
+	
+	
 	public boolean condNSFactorizacion() {
 		boolean resp = true;
 		return resp;
 	}
 	
 	//FACTORIZACIÓN LU
+	//Factorización LU
 	public void factorizacionLU(){
 		int n = this.orden[0],
 				i, j;
@@ -355,6 +358,8 @@ public class Matriz {
 		}
 	}
 	//PIVOTEO NORMAL
+	
+	//realiza pivoteo normal 
 	private double[][] pivotearNormal(double A[][], int n, int m, int k) {
 		double aux, a[][] = new double [n][m];
 		int fila=k+1, col;
@@ -375,6 +380,8 @@ public class Matriz {
 		}
 		return a;
 	}
+	//FACTORIZACION LU POR GAUSS
+	
 	//FACTORIZACION LU POR GAUSS
 	public void factorizacionLUgauss() {
 		int n = this.orden[0];
@@ -403,6 +410,8 @@ public class Matriz {
 		}
 		this.L[n-1][n-1] = 1;
 	}
+	//ELIMINACION GAUSSIANA
+	
 	//ELIMINACIÓN GAUSSIANA
 	public double[] eliminacionGaussiana() {
 		int n = this.orden[0], c;
@@ -443,6 +452,8 @@ public class Matriz {
 		
 		return x;
 	}
+	//GAUSS - JORDAN
+	
 	//GAUSS-JORDAN
 	public double[] gaussJordan(){
 		int n = this.orden[0], c;
@@ -487,6 +498,7 @@ public class Matriz {
 		
 		return x;
 	}
+	
 	//CRUT L1U
 	public double[] croutL1U() {
 		int n = this.orden[0], 
@@ -536,7 +548,7 @@ public class Matriz {
 		return x;
 	}
 	//CRUT LU1
-	public double[] croutLU1() {
+	public double[] croutL1U() {
 		int n = this.orden[0], 
 			c;
 		double x[] 	   = new double[n],

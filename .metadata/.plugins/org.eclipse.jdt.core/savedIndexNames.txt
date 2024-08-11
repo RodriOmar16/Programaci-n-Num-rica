@@ -1,5 +1,4 @@
 INDEX VERSION 1.134+D:\UNSa\PN\Programas\.metadata\.plugins\org.eclipse.jdt.core
-1423824994.index
 1865797976.index
 205188353.index
 3758924157.index

@@ -536,7 +536,7 @@ public class Matriz {
 		return x;
 	}
 	//CRUT LU1
-	public double[] croutLU1() {
+	public double[] croutL1U() {
 		int n = this.orden[0], 
 			c;
 		double x[] 	   = new double[n],

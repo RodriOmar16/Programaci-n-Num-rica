@@ -301,6 +301,8 @@ public class Matriz {
 		}*/
 		return x;
 	}
+	
+	//Devuelve la n-upla solución del Sistema Triangular inferior
 	//RESOLUCION DE SISTEMAS TRIANGULARES INFERIORES
 	public double[] resolucionSistTriangularInferior(double A[][], int n, double b[][]) {
 		//int n = this.orden[0];
@@ -321,13 +323,15 @@ public class Matriz {
 		}
 		return x;
 	}
-
+	
+	
 	public boolean condNSFactorizacion() {
 		boolean resp = true;
 		return resp;
 	}
 	
 	//FACTORIZACIÓN LU
+	//Factorización LU
 	public void factorizacionLU(){
 		int n = this.orden[0],
 				i, j;
@@ -355,6 +359,8 @@ public class Matriz {
 		}
 	}
 	//PIVOTEO NORMAL
+	
+	//realiza pivoteo normal 
 	private double[][] pivotearNormal(double A[][], int n, int m, int k) {
 		double aux, a[][] = new double [n][m];
 		int fila=k+1, col;
@@ -375,6 +381,8 @@ public class Matriz {
 		}
 		return a;
 	}
+	//FACTORIZACION LU POR GAUSS
+	
 	//FACTORIZACION LU POR GAUSS
 	public void factorizacionLUgauss() {
 		int n = this.orden[0];
@@ -403,6 +411,8 @@ public class Matriz {
 		}
 		this.L[n-1][n-1] = 1;
 	}
+	//ELIMINACION GAUSSIANA
+	
 	//ELIMINACIÓN GAUSSIANA
 	public double[] eliminacionGaussiana() {
 		int n = this.orden[0], c;
@@ -443,6 +453,8 @@ public class Matriz {
 		
 		return x;
 	}
+	//GAUSS - JORDAN
+	
 	//GAUSS-JORDAN
 	public double[] gaussJordan(){
 		int n = this.orden[0], c;
@@ -487,6 +499,7 @@ public class Matriz {
 		
 		return x;
 	}
+	
 	//CRUT L1U
 	public double[] croutL1U() {
 		int n = this.orden[0], 
@@ -511,16 +524,21 @@ public class Matriz {
 				for(int p=0; p<k ;p++) {
 					acu = acu + (G[k][p] * G[p][j]);
 				}
+				System.out.println("fila: acu: "+ acu);
+				
 				G[k][j] = G[k][j] - acu;
+				System.out.println("G["+k+"]["+j+"]: "+ G[k][j]);
 			}
-			
 			for(int i=k+1; i<n ;i++) {
 				acu = 0;
 				for(int p=0; p<k ;p++) {
-					acu = acu + (G[i][p] * G[p][k]);
+					acu = acu + (G[k][p] * G[p][k]);
 				}
+				System.out.println("columna: acu: "+ acu);
 				G[i][k] = (G[i][k] - acu)/ G[k][k]; 
+				System.out.println("G["+i+"]["+k+"]: "+ G[i][k]);
 			}
+			System.out.println("Termina la vuelta: "+k+". Comienza la vuelta: "+(k+1));
 		}
 		
 		mostrarMatrizAmpliada(G, n, n);
@@ -535,54 +553,8 @@ public class Matriz {
 		
 		return x;
 	}
+	
 	//CRUT LU1
-	public double[] croutLU1() {
-		int n = this.orden[0], 
-			c;
-		double x[] 	   = new double[n],
-			   G[][]   = new double[n][n+1],
-			   aux[][] = new double[n][1],
-			   acu     = 0;
-		
-		//Copia A y B talque G = (A|b)
-		for(int f=0; f<n ;f++) {
-			for(c=0; c<n ;c++){
-				G[f][c] = this.matrizCoef[f][c];
-			}
-			G[f][c] = this.termIndep[f][0];
-		}
-		
-		//Comienza el proceso de Factorización A = L1 * U
-		for(int k=0; k<n ;k++) {
-			for(int j=k; j<=n ;j++) {
-				acu = 0;
-				for(int p=0; p<k ;p++) {
-					acu = acu + (G[k][p] * G[p][j]);
-				}
-				G[k][j] = G[k][j] - acu;
-			}
-			
-			for(int i=k+1; i<n ;i++) {
-				acu = 0;
-				for(int p=0; p<k ;p++) {
-					acu = acu + (G[i][p] * G[p][k]);
-				}
-				G[i][k] = (G[i][k] - acu)/ G[k][k]; 
-			}
-		}
-		
-		mostrarMatrizAmpliada(G, n, n);
-		
-		//uso a x como auxiliar
-		for(int f=0; f<n ;f++) {
-			aux[f][0] = G[f][n];
-		}
-		
-		//realizo Sustitucion regresiva
-		x = resolucionSistTriangularSuperior(G, n, aux);
-		
-		return x;
-	}
 	
 	//CHOLESKY: SOLO SE PUEDE APLICAR CHOLESKY SI ES SIMETRICA O DEF. POSITIVA
 	

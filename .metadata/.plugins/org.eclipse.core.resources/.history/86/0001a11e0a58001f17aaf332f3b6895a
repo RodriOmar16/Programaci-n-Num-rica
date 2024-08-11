@@ -2,7 +2,7 @@
 public class Main {
 
 	public static void main(String[] args) {
-		Matriz a = new Matriz(4,4);
+		Matriz a = new Matriz(3,3);
 		a.cargarMatriz();
 		a.mostrarMatriz(3);
 		
