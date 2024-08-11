@@ -446,10 +446,9 @@ public class Matriz {
 		//Comienza la eliminación
 		for(int k=0; k<n-1 ;k++) {
 			//realizo privoteo de ser necesario
-			/*if(G[k][k] == 0){
+			if(G[k][k] == 0){
 				G = pivotearNormal(G,n,n+1, k);
-			}*/
-			G = pivotearParcial(G,n,n+1, k);
+			}
 			for(int i=k+1; i<n ;i++) {
 				m = (G[i][k])/(G[k][k]);
 				G[i][k] = 0;

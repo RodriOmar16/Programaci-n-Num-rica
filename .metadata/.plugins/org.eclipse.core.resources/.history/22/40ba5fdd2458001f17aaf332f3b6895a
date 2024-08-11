@@ -27,8 +27,8 @@ public class Main {
 				System.out.println("\nMatriz U: ");
 				mostrarMatriz(a.getU(),orden[0], orden[0]);*/
 				
-				x = a.eliminacionGaussiana();
-				mostrarResultado(x, orden[0]);
+				/*x = a.eliminacionGaussiana();
+				mostrarResultado(x, orden[0]);*/
 				
 				/*x = a.gaussJordan();
 				mostrarResultado(x, orden[0]);*/

@@ -380,32 +380,32 @@ public class Matriz {
 		return a;
 	}
 	//PIVOTEO PARCIAL
-	private double[][] pivotearParcial(double A[][], int n, int m, int k) {
-		double aux, a[][] = new double [n][m], may;
-		int fila=k+1, col;
-		//copio la matriz, porque a veces no me toma los cambios sobre A, por eso a
-		for(int f=0; f<n ;f++) {
-			for(int c=0; c<m ;c++) {
-				a[f][c] = A[f][c];
+		private double[][] pivotearParcial(double A[][], int n, int m, int k) {
+			double aux, a[][] = new double [n][m], may;
+			int fila=k+1, col;
+			//copio la matriz, porque a veces no me toma los cambios sobre A, por eso a
+			for(int f=0; f<n ;f++) {
+				for(int c=0; c<m ;c++) {
+					a[f][c] = A[f][c];
+				}
 			}
-		}
-		//determino de la sub-matriz, k para abajo cual es el mayo 
-		may = Math.abs(a[k][k]);
-		for(int i=k; i<n; i++) {
-			if( Math.abs(a[i][k]) > may) {
-				may =  Math.abs(a[i][k]);
-				fila = i;
+			//determino de la sub-matriz, k para abajo cual es el mayo 
+			may = Math.abs(a[k][k]);
+			for(int i=k; i<n; i++) {
+				if( Math.abs(a[i][k]) > may) {
+					may =  Math.abs(a[i][k]);
+					fila = i;
+				}
 			}
+			
+			//realizo el intercambio de las filas
+			for(col=0; col<m ;col++) {
+				aux			 = a[fila][col];
+				a[fila][col] = a[k][col];
+				a[k][col] 	 = aux;
+			}
+			return a;
 		}
-		
-		//realizo el intercambio de las filas
-		for(col=0; col<m ;col++) {
-			aux			 = a[fila][col];
-			a[fila][col] = a[k][col];
-			a[k][col] 	 = aux;
-		}
-		return a;
-	}
 	
 	//FACTORIZACION LU POR GAUSS
 	public void factorizacionLUgauss() {
@@ -446,10 +446,9 @@ public class Matriz {
 		//Comienza la eliminación
 		for(int k=0; k<n-1 ;k++) {
 			//realizo privoteo de ser necesario
-			/*if(G[k][k] == 0){
+			if(G[k][k] == 0){
 				G = pivotearNormal(G,n,n+1, k);
-			}*/
-			G = pivotearParcial(G,n,n+1, k);
+			}
 			for(int i=k+1; i<n ;i++) {
 				m = (G[i][k])/(G[k][k]);
 				G[i][k] = 0;
