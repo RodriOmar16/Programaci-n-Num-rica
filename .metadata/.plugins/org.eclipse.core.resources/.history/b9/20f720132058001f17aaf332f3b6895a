@@ -675,43 +675,44 @@ public class Matriz {
 		boolean simetrica = esSimetrica(), positiva = esDefPositiva(this.matrizCoef, n);
 		
 		if(simetrica && positiva) {
-			double acu;
-			
 			//Copia A y B talque G = (A|b)
 			L = getMatrizCoef();
 			for(int c=0; c<n ;c++){
 				L[n][c] = this.termIndep[c][0];
 			}
 			
+			
+			double acu = 0;
+			
 			//comienza el proceso de descomposición de A|b
 			for(int k=0; k<n ;k++) {
 				//para los elementos de la diagonal
 				acu = 0;
 				for(int p=k-1; p>=0 ;p--) {
-					acu = acu + Math.pow(L[k][p], 2);
+					acu = acu + Math.pow(U[p][k], 2);
 				}
-				L[k][k] = Math.sqrt(L[k][k] - acu);
+				U[k][k] = Math.sqrt(U[k][k] - acu);
 				
 				//para los demás
 				for(int j=k+1; j<=n ;j++) {
 					acu = 0;
 					for(int i=0; i<k ;i++) {
-						acu = acu + (L[k][i]*L[j][i]);
+						acu = acu + (U[i][k]*U[i][j]);
 					}
-					L[j][k] = (L[j][k] - acu)/L[k][k];
-					if(j!=n) L[k][j] = L[j][k];
+					U[k][j] = (U[k][j] - acu)/U[k][k];
+					if(j!=n) U[j][k] = U[k][j];
 				}
 			}
 			
 			//uso a x como auxiliar
-			for(int c=0; c<n ;c++) {
-				aux[c][0] = L[n][c];
+			for(int f=0; f<n ;f++) {
+				aux[f][0] = U[f][n];
 			}
 			
 			//realizo Sustitucion regresiva
-			x = resolucionSistTriangularSuperior(L, n, aux);
+			x = resolucionSistTriangularSuperior(U, n, aux);
 			
-			mostrarMatrizAmpliada(L, n,n);
+			mostrarMatrizAmpliada(U, n,n);
 			
 		}else System.out.println("No cumple las condiciones del Método de Cholesky.");
 		

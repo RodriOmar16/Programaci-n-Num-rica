@@ -44,20 +44,17 @@ public class Matriz {
 		}
 	}
 	
-	private double[][] getMatrizAmpliadaInterno(double a[][], int n, int m, double b[][]){
-		int /*n = this.orden[0], m = this.orden[1],*/ f,c;
-		double A[][] = new double[n][m+1];
+	public double[][] getMatrizAmpliada(){
+		int n = this.orden[0], m = this.orden[1], f,c;
+		double a[][] = new double[n][m+1];
 		
 		for(f=0; f<n ;f++) {
 			for(c=0; c<m ;c++) {
-				A[f][c] = a[f][c]; 
+				a[f][c] = this.matrizCoef[f][c]; 
 			}
-			A[f][c] = b[f][0];
+			a[f][0] = this.termIndep[f][0];
 		}
-		return A;
-	}
-	public double[][] getMatrizAmpliada(){
-		return getMatrizAmpliadaInterno(this.matrizCoef, this.orden[0], this.orden[1], this.termIndep);
+		return a;
 	}
 	
 	public int[] getOrden() {
@@ -412,7 +409,12 @@ public class Matriz {
 		double x[] = new double[n], G[][] = new double[n][n+1], aux[][] = new double[n][1], m;
 		
 		//Copia A y B talque G = (A|b)
-		G = getMatrizAmpliadaInterno(this.matrizCoef, n, n, this.termIndep);
+		for(int f=0; f<n ;f++) {
+			for(c=0; c<n ;c++){
+				G[f][c] = this.matrizCoef[f][c];
+			}
+			G[f][c] = this.termIndep[f][0];
+		}
 		
 		//Comienza la eliminación
 		for(int k=0; k<n-1 ;k++) {
@@ -448,7 +450,12 @@ public class Matriz {
 				G[][] = new double[n][n+1],m;
 		
 		//Copia A y B talque G = (A|b)
-		G = getMatrizAmpliadaInterno(this.matrizCoef, n, n, this.termIndep);
+		for(int f=0; f<n ;f++) {
+			for(c=0; c<n ;c++){
+				G[f][c] = this.matrizCoef[f][c];
+			}
+			G[f][c] = this.termIndep[f][0];
+		}
 						
 		//comienzo el proceso
 		for(int k=0; k<n ;k++) {
@@ -491,7 +498,12 @@ public class Matriz {
 			   acu     = 0;
 		
 		//Copia A y B talque G = (A|b)
-		G = getMatrizAmpliadaInterno(this.matrizCoef, n, n, this.termIndep);
+		for(int f=0; f<n ;f++) {
+			for(c=0; c<n ;c++){
+				G[f][c] = this.matrizCoef[f][c];
+			}
+			G[f][c] = this.termIndep[f][0];
+		}
 		
 		//Comienza el proceso de Factorización A = L1 * U
 		for(int k=0; k<n ;k++) {
@@ -535,7 +547,12 @@ public class Matriz {
 			   acu     = 0;
 		
 		//Copia A y B talque G = (A|b)
-		G = getMatrizAmpliadaInterno(this.matrizCoef, n, n, this.termIndep);
+		for(f=0; f<n ;f++) {
+			for(c=0; c<n ;c++){
+				G[f][c] = this.matrizCoef[f][c];
+			}
+			G[f][c] = this.termIndep[f][0];
+		}
 		
 		//Comienza el proceso de Factorización A = L1 * U
 		for(int k=0; k<n ;k++) {
@@ -599,122 +616,17 @@ public class Matriz {
 		
 		return cumple;
 	}
-	private boolean esDefPositiva(double a[][], int n) {
+	
+	private boolean esDefPositva(double a[][], int n) {
 		boolean cumple = true;
-		int i=n-1;
+		int i=n-1, j;
 		double det;
-		if(a[0][0] <= 0) {
-			cumple = false;
-		}
-		while(i>0 && cumple) {
+		
+		while(i>=0 && cumple) {
 			det = determinante(a,i,i,2,1);
-			if(det <= 0) {
-				cumple = false;
-			}
 			i--;
 		}
 		
 		return cumple;
-	}
-	//CHOLESKY DONDE L ES LA TRASPUESTA DE U
-	public double[] choleskyUtU() {
-		int n = this.orden[0];
-		double x[]     = new double[n],
-			   U[][]   = new double[n][n+1],
-			   aux[][] = new double[n][1];
-		
-		boolean simetrica = esSimetrica(), positiva = esDefPositiva(this.matrizCoef, n);
-		
-		if(simetrica && positiva) {
-			//Copia A y B talque G = (A|b)
-			U = getMatrizAmpliadaInterno(this.matrizCoef, n, n, this.termIndep);
-			
-			double acu = 0;
-			
-			//comienza el proceso de descomposición de A|b
-			for(int k=0; k<n ;k++) {
-				//para los elementos de la diagonal
-				acu = 0;
-				for(int p=k-1; p>=0 ;p--) {
-					acu = acu + Math.pow(U[p][k], 2);
-				}
-				U[k][k] = Math.sqrt(U[k][k] - acu);
-				
-				//para los demás
-				for(int j=k+1; j<=n ;j++) {
-					acu = 0;
-					for(int i=0; i<k ;i++) {
-						acu = acu + (U[i][k]*U[i][j]);
-					}
-					U[k][j] = (U[k][j] - acu)/U[k][k];
-					if(j!=n) U[j][k] = U[k][j];
-				}
-			}
-			
-			//uso a x como auxiliar
-			for(int f=0; f<n ;f++) {
-				aux[f][0] = U[f][n];
-			}
-			
-			//realizo Sustitucion regresiva
-			x = resolucionSistTriangularSuperior(U, n, aux);
-			
-			mostrarMatrizAmpliada(U, n,n);
-			
-		}else System.out.println("No cumple las condiciones del Método de Cholesky.");
-		
-		return x;
-	}
-	//CHOLESKY DONDE U ES LA TRASPUESTA DE L
-	public double[] choleskyLLt() {
-		int n = this.orden[0];
-		double x[]     = new double[n],
-			   L[][]   = new double[n+1][n],
-			   aux[][] = new double[n][1];
-		
-		boolean simetrica = esSimetrica(), positiva = esDefPositiva(this.matrizCoef, n);
-		
-		if(simetrica && positiva) {
-			double acu;
-			
-			//Copia A y B talque G = (A|b)
-			L = getMatrizCoef();
-			for(int c=0; c<n ;c++){
-				L[n][c] = this.termIndep[c][0];
-			}
-			
-			//comienza el proceso de descomposición de A|b
-			for(int k=0; k<n ;k++) {
-				//para los elementos de la diagonal
-				acu = 0;
-				for(int p=k-1; p>=0 ;p--) {
-					acu = acu + Math.pow(L[k][p], 2);
-				}
-				L[k][k] = Math.sqrt(L[k][k] - acu);
-				
-				//para los demás
-				for(int j=k+1; j<=n ;j++) {
-					acu = 0;
-					for(int i=0; i<k ;i++) {
-						acu = acu + (L[k][i]*L[j][i]);
-					}
-					L[j][k] = (L[j][k] - acu)/L[k][k];
-					if(j!=n) L[k][j] = L[j][k];
-				}
-			}
-			
-			//uso a x como auxiliar
-			for(int c=0; c<n ;c++) {
-				aux[c][0] = L[n][c];
-			}
-			
-			//realizo Sustitucion regresiva
-			x = resolucionSistTriangularSuperior(L, n, aux);
-			
-			mostrarMatrizAmpliada(L, n,n);
-			
-		}else System.out.println("No cumple las condiciones del Método de Cholesky.");
-		
-		return x;
 	}
 }

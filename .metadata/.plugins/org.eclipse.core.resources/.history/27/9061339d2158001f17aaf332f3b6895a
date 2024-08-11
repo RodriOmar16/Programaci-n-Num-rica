@@ -704,14 +704,14 @@ public class Matriz {
 			}
 			
 			//uso a x como auxiliar
-			for(int c=0; c<n ;c++) {
-				aux[c][0] = L[n][c];
+			for(int f=0; f<n ;f++) {
+				aux[f][0] = L[n][f];
 			}
 			
 			//realizo Sustitucion regresiva
-			x = resolucionSistTriangularSuperior(L, n, aux);
+			x = resolucionSistTriangularSuperior(U, n, aux);
 			
-			mostrarMatrizAmpliada(L, n,n);
+			mostrarMatrizAmpliada(U, n,n);
 			
 		}else System.out.println("No cumple las condiciones del Método de Cholesky.");
 		
