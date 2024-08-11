@@ -189,7 +189,6 @@ public class Matriz {
 		return (cumple == true);
 	}
 	
-	
 	private double deno_det(double[][] A, int n){ //calcula el denominador de la formula de gauss para calc. del det
 		double acu=1,cont=0;
 		for(int c=0; c<n ;c++){
@@ -210,7 +209,6 @@ public class Matriz {
 	private double met_Sarrus(double[][] A){//Método de la regla de Sarrus
 		return ((A[0][0]*A[1][1]*A[2][2])+(A[0][1]*A[1][2]*A[2][0])+(A[0][2]*A[1][0]*A[2][1])) + (-(A[0][2]*A[1][1]*A[2][0])-(A[0][0]*A[1][2]*A[2][1])-(A[0][1]*A[1][0]*A[2][2]));
 	}
-	
 	
 	private double[][] menor_corres(double A[][],int n,int filk,int colk){ //calcula el menor correspondiente
 		double[][] M = new double[n-1][n-1];	int i=0,j,b=0,f,c, filas = n-1, columnas = filas;
@@ -243,7 +241,6 @@ public class Matriz {
 	}
 	
 	//Determinante de una matriz
-	
 	private double determinante(double [][]A, int n, int m, int caso,int fila){ //fila es para el desarrollo de laplace
 		double det = 0;
 		if(n==2 && m==2){	return A[0][0]*A[1][1] - A[1][0]*A[0][1]; }
