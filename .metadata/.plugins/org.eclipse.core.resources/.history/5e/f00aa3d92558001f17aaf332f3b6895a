@@ -390,7 +390,7 @@ public class Matriz {
 			}
 		}
 		//determino de la sub-matriz, k para abajo cual es el mayo 
-		may = Math.abs(a[k][k]); fila=k;
+		may = Math.abs(a[k][k]);
 		for(int i=k; i<n; i++) {
 			if( Math.abs(a[i][k]) > may) {
 				may =  Math.abs(a[i][k]);
@@ -409,7 +409,7 @@ public class Matriz {
 	//PIVOTEAR COMPLETO
 	private double[][] pivotearCompleto(double A[][], int n, int m, int k) {
 		double aux, a[][] = new double [n][m], may;
-		int fila, columna, col, interCol = 0, interFila = 0;
+		int fila, columna, col;
 		//copio la matriz, porque a veces no me toma los cambios sobre A, por eso a
 		for(int f=0; f<n ;f++) {
 			for(int c=0; c<m ;c++) {
@@ -417,33 +417,19 @@ public class Matriz {
 			}
 		}
 		//determino de la sub-matriz, k para abajo cual es el mayo 
-		may = Math.abs(a[k][k]); fila=k; columna = k;
+		may = Math.abs(a[k][k]);
 		for(int i=k; i<n; i++) {
-			for(int j=k; j<n ;j++) {
-				if(Math.abs(a[i][j]) > may) {
-					may 	=  Math.abs(a[i][j]);
-					fila 	= i;
-					columna = j;
-					interCol = 1;
-					interFila = 1;
-				}
+			if( Math.abs(a[i][k]) > may) {
+				may =  Math.abs(a[i][k]);
+				fila = i;
 			}
 		}
-		if(interCol != 0) {
-			//realizo el intercambio de las columnas
-			for(int f=k; f<n ;f++) {
-				aux			 = a[f][columna];
-				a[f][columna] = a[f][k];
-				a[f][k] 	 = aux;
-			}
-		}
-		if(interFila != 0){
-			//realizo el intercambio de las filas
-			for(col=0; col<m ;col++) {
-				aux			 = a[fila][col];
-				a[fila][col] = a[k][col];
-				a[k][col] 	 = aux;
-			}
+		
+		//realizo el intercambio de las filas
+		for(col=0; col<m ;col++) {
+			aux			 = a[fila][col];
+			a[fila][col] = a[k][col];
+			a[k][col] 	 = aux;
 		}
 		return a;
 	}
@@ -490,8 +476,7 @@ public class Matriz {
 			/*if(G[k][k] == 0){
 				G = pivotearNormal(G,n,n+1, k);
 			}*/
-			//G = pivotearParcial(G,n,n+1, k);
-			G = pivotearCompleto(G,n,n+1, k);
+			G = pivotearParcial(G,n,n+1, k);
 			for(int i=k+1; i<n ;i++) {
 				m = (G[i][k])/(G[k][k]);
 				G[i][k] = 0;
