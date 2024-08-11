@@ -588,7 +588,6 @@ public class Matriz {
 			}
 			
 		}
-		
 		//realizo Sustitucion regresiva
 		x = resolucionSistTriangularSuperior(D, n, aux);
 		

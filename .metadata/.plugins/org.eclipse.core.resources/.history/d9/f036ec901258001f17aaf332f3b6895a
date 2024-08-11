@@ -538,19 +538,20 @@ public class Matriz {
 	//CRUT LU1
 	public double[] croutLU1() {
 		int n = this.orden[0],
-			f, c;
+			f;
 		double x[] 	   = new double[n],
 			   G[][]   = new double[n][n+1],
 			   aux[][] = new double[n][1],
-			   D[][]   = new double[n][n],
 			   acu     = 0;
 		
 		//Copia A y B talque G = (A|b)
 		for(f=0; f<n ;f++) {
-			for(c=0; c<n ;c++){
+			for(int c=0; c<n ;c++){
 				G[f][c] = this.matrizCoef[f][c];
 			}
-			G[f][c] = this.termIndep[f][0];
+		}
+		for(int c=0; c<n ;c++) {
+			G[f][c] = this.termIndep[c][0];
 		}
 		
 		//Comienza el proceso de Factorización A = L1 * U
@@ -572,25 +573,15 @@ public class Matriz {
 			}
 		}
 		
-		mostrarMatrizAmpliada(G, n, n);
+		mostrarMatrizCoef(G, n, n);
 		
 		//uso a x como auxiliar
-		for(f=0; f<n ;f++) {
+		/*for(f=0; f<n ;f++) {
 			aux[f][0] = G[f][n];
-		}
-		
-		//Construyo la matriz triangular superior para mandar a sust. regresiva
-		for(f=0; f<n ;f++) {
-			for(c=f; c<n ;c++) {
-				if(f==c) {
-					D[f][c] = 1;
-				}else D[f][c] = G[f][c];
-			}
-			
-		}
+		}*/
 		
 		//realizo Sustitucion regresiva
-		x = resolucionSistTriangularSuperior(D, n, aux);
+		//x = resolucionSistTriangularSuperior(G, n, aux);
 		
 		return x;
 	}

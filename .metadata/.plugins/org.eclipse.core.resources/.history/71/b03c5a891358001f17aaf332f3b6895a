@@ -580,14 +580,6 @@ public class Matriz {
 		}
 		
 		//Construyo la matriz triangular superior para mandar a sust. regresiva
-		for(f=0; f<n ;f++) {
-			for(c=f; c<n ;c++) {
-				if(f==c) {
-					D[f][c] = 1;
-				}else D[f][c] = G[f][c];
-			}
-			
-		}
 		
 		//realizo Sustitucion regresiva
 		x = resolucionSistTriangularSuperior(D, n, aux);
