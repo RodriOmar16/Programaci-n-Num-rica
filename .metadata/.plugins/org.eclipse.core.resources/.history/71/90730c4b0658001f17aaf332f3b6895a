@@ -138,6 +138,14 @@ public class Matriz {
 			case 1: //matriz de coef
 				n = this.orden[0]; m = this.orden[1];
 				mostrarMatrizCoef(this.matrizCoef,n,m);
+				/*System.out.println("\nMuestra de la matriz de coeficientes: ");
+				for(f=0; f<n ;f++) {
+					System.out.println();
+					for(c=0; c<m ;c++) {
+						System.out.print(this.matrizCoef[f][c]+"\t");
+					}
+				}
+				System.out.println("");*/
 				break;
 			case 2: //terminos indep
 				n = this.orden[0];

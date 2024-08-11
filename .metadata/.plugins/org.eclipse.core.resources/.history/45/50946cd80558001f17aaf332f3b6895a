@@ -2,7 +2,7 @@
 public class Main {
 
 	public static void main(String[] args) {
-		Matriz a = new Matriz(3,3);
+		Matriz a = new Matriz(4,4);
 		a.cargarMatriz();
 		a.mostrarMatriz(3);
 		
@@ -27,10 +27,10 @@ public class Main {
 				System.out.println("\nMatriz U: ");
 				mostrarMatriz(a.getU(),orden[0], orden[0]);*/
 				
-				/*x = a.eliminacionGaussiana();
-				mostrarResultado(x, orden[0]);*/
-				x = a.gaussJordan();
+				x = a.eliminacionGaussiana();
 				mostrarResultado(x, orden[0]);
+				//x = a.gaussJordan();
+				//mostrarResultado(x, orden[0]);
 			}else System.out.println("La matriz de coeficiente no es inversible(Determinante <> 0). No es posible continuar");
 		}else {
 			System.out.println("\nLa matriz no es cuadrada, no es posible calcular el Determinante.");

@@ -102,6 +102,7 @@ public class Matriz {
 	}
 	
 	private void mostrarMatrizCoef(double a[][], int n, int m) {
+		//n = this.orden[0]; m = this.orden[1];
 		System.out.println("\nMuestra de la matriz de coeficientes: ");
 		for(int f=0; f<n ;f++) {
 			System.out.println();
@@ -119,11 +120,11 @@ public class Matriz {
 	}
 	
 	private void mostrarMatrizAmpliada(double a[][], int n, int m) {
-		int c;
+		//n = this.orden[0]; m = this.orden[1];
 		System.out.println("\nMuestra de la matriz de ampliada: ");
 		for(int f=0; f<n ;f++) {
 			System.out.println();
-			for(c=0; c<m ;c++) {
+			for(int c=0; c<m ;c++) {
 				if(c != m-1) {
 					System.out.print(a[f][c]+"\t");
 				}else System.out.print(a[f][c]+"");
@@ -138,6 +139,14 @@ public class Matriz {
 			case 1: //matriz de coef
 				n = this.orden[0]; m = this.orden[1];
 				mostrarMatrizCoef(this.matrizCoef,n,m);
+				/*System.out.println("\nMuestra de la matriz de coeficientes: ");
+				for(f=0; f<n ;f++) {
+					System.out.println();
+					for(c=0; c<m ;c++) {
+						System.out.print(this.matrizCoef[f][c]+"\t");
+					}
+				}
+				System.out.println("");*/
 				break;
 			case 2: //terminos indep
 				n = this.orden[0];
@@ -441,7 +450,16 @@ public class Matriz {
 		//realizo Sustitucion regresiva
 		x = resolucionSistTriangularSuperior(G, n, aux);
 		
-		mostrarMatrizAmpliada(G, n,n);	
+		System.out.println("\nMuestra de la matriz de G: ");
+		for(int f=0; f<n ;f++) {
+			System.out.println();
+			for(c=0; c<n ;c++) {
+				if(c != n-1) {
+					System.out.print(G[f][c]+"\t");
+				}else System.out.print(G[f][c]+"");
+			}
+			System.out.print(" | "+G[f][c]+"\t");
+		}		
 		
 		return x;
 	}
@@ -459,7 +477,8 @@ public class Matriz {
 			}
 			G[f][c] = this.termIndep[f][0];
 		}
-						
+		//G = getMatrizAmpliada();
+				
 		//comienzo el proceso
 		for(int k=0; k<n ;k++) {
 			//realiza pivoteo de ser necesario
@@ -485,9 +504,6 @@ public class Matriz {
 		for(int i=0; i<n ;i++) {
 			x[i] = G[i][n];
 		}
-		
-		mostrarMatrizAmpliada(G, n,n);
-		
 		return x;
 	}
 	
