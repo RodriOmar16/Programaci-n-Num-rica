@@ -44,17 +44,20 @@ public class Matriz {
 		}
 	}
 	
-	public double[][] getMatrizAmpliada(){
-		int n = this.orden[0], m = this.orden[1], f,c;
-		double a[][] = new double[n][m+1];
+	private double[][] getMatrizAmpliadaInterno(double a[][], int n, int m, double b[][]){
+		int /*n = this.orden[0], m = this.orden[1],*/ f,c;
+		double A[][] = new double[n][m+1];
 		
 		for(f=0; f<n ;f++) {
 			for(c=0; c<m ;c++) {
-				a[f][c] = this.matrizCoef[f][c]; 
+				A[f][c] = a[f][c]; 
 			}
-			a[f][0] = this.termIndep[f][0];
+			A[f][c] = b[f][0];
 		}
-		return a;
+		return A;
+	}
+	public double[][] getMatrizAmpliada(){
+		return getMatrizAmpliadaInterno(this.matrizCoef, this.orden[0], this.orden[1], this.termIndep);
 	}
 	
 	public int[] getOrden() {
@@ -157,6 +160,56 @@ public class Matriz {
 		System.out.print("");
 	}
 		
+	//CALCULA LA NORMA 1 DEL VECTOR
+	private double norma1Vector(double x[], int n) {
+		double acu = 0;
+		for(int i=0; i<n ;i++){
+			acu += Math.abs(x[i]);
+		}
+		return acu;
+	}
+	//CALCULA LA NORMA 2 o EUCLIADEA DEL VECTOR
+	private double norma2Vector(double x[], int n) {
+		double acu = 0;
+		for(int i=0; i<n ;i++){
+			acu += Math.pow(x[i],2);
+		}
+		return Math.sqrt(acu);
+	}
+	//CALCULA LA NORMA INFINITO DEL VECTOR
+	private double normaInfinitoVector(double x[], int n) {
+		double may = Math.abs(x[0]);
+		for(int i=1; i<n ;i++){
+			if(Math.abs(x[i]) > may) {
+				may = Math.abs(x[i]);
+			}
+		}
+		return may;
+	}
+	
+	//CALCULA LA NORMA DE FROBENIUS O EUCLIDEA DE LA MATRIZ
+	private double normaFrobeniusMatriz(double a[][], int n, int m) {
+		double acu = 0;
+		for(int i=0; i<n ;i++) {
+			for(int j=0; j<m ;j++) {
+				acu += Math.pow(a[i][j],2);
+			}
+		}
+		
+		return Math.sqrt(acu);
+	}
+	//CALCULA LA NORMA DE FROBENIUS O EUCLIDEA DE LA MATRIZ
+	private double normaFrobeniusMatriz(double a[][], int n, int m) {
+		double acu = 0;
+		for(int i=0; i<n ;i++) {
+			for(int j=0; j<m ;j++) {
+				acu += Math.pow(a[i][j],2);
+			}
+		}
+		
+		return Math.sqrt(acu);
+	}
+	
 	//Comprueba si es triangular superior o no
 	private boolean esTriangularSuperior(double [][]a, int n, int m) {
 		boolean cumple = true;
@@ -173,7 +226,6 @@ public class Matriz {
 		}
 		return (cumple == true);
 	}
-	
 	//Comprueba si es triangular inferior o no
 	private boolean esTriangularInferior(double [][]a, int n, int m) {
 		boolean cumple = true;
@@ -188,8 +240,7 @@ public class Matriz {
 		}
 		return (cumple == true);
 	}
-	
-	
+		
 	private double deno_det(double[][] A, int n){ //calcula el denominador de la formula de gauss para calc. del det
 		double acu=1,cont=0;
 		for(int c=0; c<n ;c++){
@@ -242,7 +293,6 @@ public class Matriz {
 		return acu;
 	}
 	
-	//Determinante de una matriz
 	//DETERMINANTE
 	private double determinante(double [][]A, int n, int m, int caso,int fila){ //fila es para el desarrollo de laplace
 		double det = 0;
@@ -269,7 +319,6 @@ public class Matriz {
 		return determinante(this.matrizCoef,this.orden[0], this.orden[1], caso, 0); 
 	}
 	//RESOLUCION DE SISTEMAS DIAGONAL
-	//Devuelve la n-upla solución del sistema
 	public double[] resolucionSistDiagonal() {
 		int n = this.orden[0];
 		double x[] = new double[n];
@@ -278,8 +327,6 @@ public class Matriz {
 		}
 		return x;
 	}
-	
-	//Devuelve la n-upla solución del Sistema Triangular superior
 	//RESOLUCION DE SISTEMAS TRIANGULARES SUPERIORES
 	public double[] resolucionSistTriangularSuperior(double A[][], int n, double b[][]) {
 		//int n = this.orden[0];
@@ -354,6 +401,7 @@ public class Matriz {
 			}
 		}
 	}
+	
 	//PIVOTEO NORMAL
 	private double[][] pivotearNormal(double A[][], int n, int m, int k) {
 		double aux, a[][] = new double [n][m];
@@ -375,6 +423,75 @@ public class Matriz {
 		}
 		return a;
 	}
+	//PIVOTEO PARCIAL
+	private double[][] pivotearParcial(double A[][], int n, int m, int k) {
+		double aux, a[][] = new double [n][m], may;
+		int fila, col;
+		//copio la matriz, porque a veces no me toma los cambios sobre A, por eso a
+		for(int f=0; f<n ;f++) {
+			for(int c=0; c<m ;c++) {
+				a[f][c] = A[f][c];
+			}
+		}
+		//determino de la sub-matriz, k para abajo cual es el mayo 
+		may = Math.abs(a[k][k]); fila=k;
+		for(int i=k; i<n; i++) {
+			if( Math.abs(a[i][k]) > may) {
+				may =  Math.abs(a[i][k]);
+				fila = i;
+			}
+		}
+		
+		//realizo el intercambio de las filas
+		for(col=0; col<m ;col++) {
+			aux			 = a[fila][col];
+			a[fila][col] = a[k][col];
+			a[k][col] 	 = aux;
+		}
+		return a;
+	}
+	//PIVOTEAR COMPLETO
+	private double[][] pivotearCompleto(double A[][], int n, int m, int k) {
+		double aux, a[][] = new double [n][m], may;
+		int fila, columna, col, interCol = 0, interFila = 0;
+		//copio la matriz, porque a veces no me toma los cambios sobre A, por eso a
+		for(int f=0; f<n ;f++) {
+			for(int c=0; c<m ;c++) {
+				a[f][c] = A[f][c];
+			}
+		}
+		//determino de la sub-matriz, k para abajo cual es el mayo 
+		may = Math.abs(a[k][k]); fila=k; columna = k;
+		for(int i=k; i<n; i++) {
+			for(int j=k; j<n ;j++) {
+				if(Math.abs(a[i][j]) > may) {
+					may 	=  Math.abs(a[i][j]);
+					fila 	= i;
+					columna = j;
+					interCol = 1;
+					interFila = 1;
+				}
+			}
+		}
+		if(interCol != 0) {
+			//realizo el intercambio de las columnas
+			for(int f=k; f<n ;f++) {
+				aux			 = a[f][columna];
+				a[f][columna] = a[f][k];
+				a[f][k] 	 = aux;
+			}
+		}
+		if(interFila != 0){
+			//realizo el intercambio de las filas
+			for(col=0; col<m ;col++) {
+				aux			 = a[fila][col];
+				a[fila][col] = a[k][col];
+				a[k][col] 	 = aux;
+			}
+		}
+		return a;
+	}
+	
 	//FACTORIZACION LU POR GAUSS
 	public void factorizacionLUgauss() {
 		int n = this.orden[0];
@@ -409,19 +526,16 @@ public class Matriz {
 		double x[] = new double[n], G[][] = new double[n][n+1], aux[][] = new double[n][1], m;
 		
 		//Copia A y B talque G = (A|b)
-		for(int f=0; f<n ;f++) {
-			for(c=0; c<n ;c++){
-				G[f][c] = this.matrizCoef[f][c];
-			}
-			G[f][c] = this.termIndep[f][0];
-		}
+		G = getMatrizAmpliadaInterno(this.matrizCoef, n, n, this.termIndep);
 		
 		//Comienza la eliminación
 		for(int k=0; k<n-1 ;k++) {
 			//realizo privoteo de ser necesario
-			if(G[k][k] == 0){
+			/*if(G[k][k] == 0){
 				G = pivotearNormal(G,n,n+1, k);
-			}
+			}*/
+			//G = pivotearParcial(G,n,n+1, k);
+			G = pivotearCompleto(G,n,n+1, k);
 			for(int i=k+1; i<n ;i++) {
 				m = (G[i][k])/(G[k][k]);
 				G[i][k] = 0;
@@ -450,12 +564,7 @@ public class Matriz {
 				G[][] = new double[n][n+1],m;
 		
 		//Copia A y B talque G = (A|b)
-		for(int f=0; f<n ;f++) {
-			for(c=0; c<n ;c++){
-				G[f][c] = this.matrizCoef[f][c];
-			}
-			G[f][c] = this.termIndep[f][0];
-		}
+		G = getMatrizAmpliadaInterno(this.matrizCoef, n, n, this.termIndep);
 						
 		//comienzo el proceso
 		for(int k=0; k<n ;k++) {
@@ -487,6 +596,7 @@ public class Matriz {
 		
 		return x;
 	}
+	
 	//CRUT L1U
 	public double[] croutL1U() {
 		int n = this.orden[0], 
@@ -497,12 +607,7 @@ public class Matriz {
 			   acu     = 0;
 		
 		//Copia A y B talque G = (A|b)
-		for(int f=0; f<n ;f++) {
-			for(c=0; c<n ;c++){
-				G[f][c] = this.matrizCoef[f][c];
-			}
-			G[f][c] = this.termIndep[f][0];
-		}
+		G = getMatrizAmpliadaInterno(this.matrizCoef, n, n, this.termIndep);
 		
 		//Comienza el proceso de Factorización A = L1 * U
 		for(int k=0; k<n ;k++) {
@@ -546,12 +651,7 @@ public class Matriz {
 			   acu     = 0;
 		
 		//Copia A y B talque G = (A|b)
-		for(f=0; f<n ;f++) {
-			for(c=0; c<n ;c++){
-				G[f][c] = this.matrizCoef[f][c];
-			}
-			G[f][c] = this.termIndep[f][0];
-		}
+		G = getMatrizAmpliadaInterno(this.matrizCoef, n, n, this.termIndep);
 		
 		//Comienza el proceso de Factorización A = L1 * U
 		for(int k=0; k<n ;k++) {
@@ -574,7 +674,7 @@ public class Matriz {
 		
 		mostrarMatrizAmpliada(G, n, n);
 		
-		//uso a x como auxiliar
+		//uso aux como auxiliar
 		for(f=0; f<n ;f++) {
 			aux[f][0] = G[f][n];
 		}
@@ -596,5 +696,141 @@ public class Matriz {
 	}
 	
 	//CHOLESKY: SOLO SE PUEDE APLICAR CHOLESKY SI ES SIMETRICA O DEF. POSITIVA
-	
+	private boolean esSimetrica() {
+		boolean cumple = true;
+		
+		int i=0 , n = this.orden[0], j;
+		while(i<n && cumple) {
+			j=0;
+			while(j<n && cumple) {
+				if(i!=j) {
+					if(this.matrizCoef[i][j] != this.matrizCoef[j][i]){
+						cumple = false;
+					}
+				}
+				j++;
+			}
+			i++;
+		}
+		
+		return cumple;
+	}
+	private boolean esDefPositiva(double a[][], int n) {
+		boolean cumple = true;
+		int i=n-1;
+		double det;
+		if(a[0][0] <= 0) {
+			cumple = false;
+		}
+		while(i>0 && cumple) {
+			det = determinante(a,i,i,2,1);
+			if(det <= 0) {
+				cumple = false;
+			}
+			i--;
+		}
+		
+		return cumple;
+	}
+	//CHOLESKY DONDE L ES LA TRASPUESTA DE U
+	public double[] choleskyUtU() {
+		int n = this.orden[0];
+		double x[]     = new double[n],
+			   U[][]   = new double[n][n+1],
+			   aux[][] = new double[n][1];
+		
+		boolean simetrica = esSimetrica(), positiva = esDefPositiva(this.matrizCoef, n);
+		
+		if(simetrica && positiva) {
+			//Copia A y B talque G = (A|b)
+			U = getMatrizAmpliadaInterno(this.matrizCoef, n, n, this.termIndep);
+			
+			double acu = 0;
+			
+			//comienza el proceso de descomposición de A|b
+			for(int k=0; k<n ;k++) {
+				//para los elementos de la diagonal
+				acu = 0;
+				for(int p=k-1; p>=0 ;p--) {
+					acu = acu + Math.pow(U[p][k], 2);
+				}
+				U[k][k] = Math.sqrt(U[k][k] - acu);
+				
+				//para los demás
+				for(int j=k+1; j<=n ;j++) {
+					acu = 0;
+					for(int i=0; i<k ;i++) {
+						acu = acu + (U[i][k]*U[i][j]);
+					}
+					U[k][j] = (U[k][j] - acu)/U[k][k];
+					if(j!=n) U[j][k] = U[k][j];
+				}
+			}
+			
+			//uso a x como auxiliar
+			for(int f=0; f<n ;f++) {
+				aux[f][0] = U[f][n];
+			}
+			
+			//realizo Sustitucion regresiva
+			x = resolucionSistTriangularSuperior(U, n, aux);
+			
+			mostrarMatrizAmpliada(U, n,n);
+			
+		}else System.out.println("No cumple las condiciones del Método de Cholesky.");
+		
+		return x;
+	}
+	//CHOLESKY DONDE U ES LA TRASPUESTA DE L
+	public double[] choleskyLLt() {
+		int n = this.orden[0];
+		double x[]     = new double[n],
+			   L[][]   = new double[n+1][n],
+			   aux[][] = new double[n][1];
+		
+		boolean simetrica = esSimetrica(), positiva = esDefPositiva(this.matrizCoef, n);
+		
+		if(simetrica && positiva) {
+			double acu;
+			
+			//Copia A y B talque G = (A|b)
+			L = getMatrizCoef();
+			for(int c=0; c<n ;c++){
+				L[n][c] = this.termIndep[c][0];
+			}
+			
+			//comienza el proceso de descomposición de A|b
+			for(int k=0; k<n ;k++) {
+				//para los elementos de la diagonal
+				acu = 0;
+				for(int p=k-1; p>=0 ;p--) {
+					acu = acu + Math.pow(L[k][p], 2);
+				}
+				L[k][k] = Math.sqrt(L[k][k] - acu);
+				
+				//para los demás
+				for(int j=k+1; j<=n ;j++) {
+					acu = 0;
+					for(int i=0; i<k ;i++) {
+						acu = acu + (L[k][i]*L[j][i]);
+					}
+					L[j][k] = (L[j][k] - acu)/L[k][k];
+					if(j!=n) L[k][j] = L[j][k];
+				}
+			}
+			
+			//uso a x como auxiliar
+			for(int c=0; c<n ;c++) {
+				aux[c][0] = L[n][c];
+			}
+			
+			//realizo Sustitucion regresiva
+			x = resolucionSistTriangularSuperior(L, n, aux);
+			
+			mostrarMatrizAmpliada(L, n,n);
+			
+		}else System.out.println("No cumple las condiciones del Método de Cholesky.");
+		
+		return x;
+	}
 }

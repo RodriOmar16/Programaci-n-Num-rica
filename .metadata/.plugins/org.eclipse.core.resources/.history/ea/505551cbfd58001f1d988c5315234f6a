@@ -217,25 +217,6 @@ public class Matriz {
 		}
 		return may;
 	}
-	//CALCULA LA NORMA DE FROBENIUS O EUCLIDEA DE LA MATRIZ
-	private double normaInfinitoMatriz(double a[][], int n, int m) {
-		double may, acu = 0;
-		for(int j=0; j<m ;j++) {
-			acu += Math.abs(a[0][j]);
-		}
-		may = acu;
-		
-		for(int i=1; i<n ;i++) {
-			acu = 0;
-			for(int j=0; j<m ;j++) {
-				acu += Math.abs(a[i][j]);
-			}
-			if(acu > may) {
-				may = acu;
-			}
-		}
-		return may;
-	}
 	
 	//Comprueba si es triangular superior o no
 	private boolean esTriangularSuperior(double [][]a, int n, int m) {

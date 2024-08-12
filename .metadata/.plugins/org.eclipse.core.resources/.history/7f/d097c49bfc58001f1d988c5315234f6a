@@ -198,44 +198,6 @@ public class Matriz {
 		
 		return Math.sqrt(acu);
 	}
-	//CALCULA LA NORMA DE FROBENIUS O EUCLIDEA DE LA MATRIZ
-	private double norma1Matriz(double a[][], int n, int m) {
-		double may, acu = 0;
-		for(int i=0; i<n ;i++) {
-			acu += Math.abs(a[i][0]);
-		}
-		may = acu;
-		
-		for(int j=1; j<m ;j++) {
-			acu = 0;
-			for(int i=0; i<n ;i++) {
-				acu += Math.abs(a[i][j]);
-			}
-			if(acu > may) {
-				may = acu;
-			}
-		}
-		return may;
-	}
-	//CALCULA LA NORMA DE FROBENIUS O EUCLIDEA DE LA MATRIZ
-	private double normaInfinitoMatriz(double a[][], int n, int m) {
-		double may, acu = 0;
-		for(int j=0; j<m ;j++) {
-			acu += Math.abs(a[0][j]);
-		}
-		may = acu;
-		
-		for(int i=1; i<n ;i++) {
-			acu = 0;
-			for(int j=0; j<m ;j++) {
-				acu += Math.abs(a[i][j]);
-			}
-			if(acu > may) {
-				may = acu;
-			}
-		}
-		return may;
-	}
 	
 	//Comprueba si es triangular superior o no
 	private boolean esTriangularSuperior(double [][]a, int n, int m) {
@@ -253,6 +215,7 @@ public class Matriz {
 		}
 		return (cumple == true);
 	}
+	
 	//Comprueba si es triangular inferior o no
 	private boolean esTriangularInferior(double [][]a, int n, int m) {
 		boolean cumple = true;
@@ -267,7 +230,8 @@ public class Matriz {
 		}
 		return (cumple == true);
 	}
-		
+	
+	
 	private double deno_det(double[][] A, int n){ //calcula el denominador de la formula de gauss para calc. del det
 		double acu=1,cont=0;
 		for(int c=0; c<n ;c++){
