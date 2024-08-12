@@ -9,6 +9,8 @@
 		<item key="isRegEx" value="false"/>
 		<list key="findhistory">
 			<item value="getMatrizAmpliada"/>
+			<item value="El sistema no es triangular Superior."/>
+			<item value="mostrarMatrizAmpliada"/>
 			<item value="resolucionSistTriangularInferior"/>
 			<item value="esTriangularSuperior"/>
 			<item value="round"/>
@@ -21,8 +23,6 @@
 			<item value="mostrarCoef"/>
 			<item value="funcion_derivada"/>
 			<item value="tabla"/>
-			<item value="sig"/>
-			<item value="ant"/>
 		</list>
 		<list key="replacehistory">
 			<item value="derivada_1"/>

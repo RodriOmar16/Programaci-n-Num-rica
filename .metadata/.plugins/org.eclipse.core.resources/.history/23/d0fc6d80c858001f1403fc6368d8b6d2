@@ -290,6 +290,7 @@ public class Matriz {
 		return determinante(this.matrizCoef,this.orden[0], this.orden[1], caso, 0); 
 	}
 	//RESOLUCION DE SISTEMAS DIAGONAL
+	//Devuelve la n-upla solución del sistema
 	public double[] resolucionSistDiagonal() {
 		int n = this.orden[0];
 		double x[] = new double[n];
@@ -298,6 +299,8 @@ public class Matriz {
 		}
 		return x;
 	}
+	
+	//Devuelve la n-upla solución del Sistema Triangular superior
 	//RESOLUCION DE SISTEMAS TRIANGULARES SUPERIORES
 	public double[] resolucionSistTriangularSuperior(double A[][], int n, double b[][]) {
 		//int n = this.orden[0];

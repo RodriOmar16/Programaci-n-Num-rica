@@ -27,20 +27,16 @@ public class Main {
 				System.out.println("\nMatriz U: ");
 				mostrarMatriz(a.getU(),orden[0], orden[0]);*/
 				
-				/*x = a.eliminacionGaussiana();
-				mostrarResultado(x, orden[0]);*/
+				x = a.eliminacionGaussiana();
+				mostrarResultado(x, orden[0]);
 				
 				/*x = a.gaussJordan();
 				mostrarResultado(x, orden[0]);*/
 				
-				/*x = a.croutL1U();
-				mostrarResultado(x, orden[0]);*/
 				/*x = a.croutLU1();
 				mostrarResultado(x, orden[0]);*/
 				
-				x = a.choleskyUtU();
-				mostrarResultado(x, orden[0]);
-				/*x = a.choleskyLLt();
+				/*x = a.choleskyUtU();
 				mostrarResultado(x, orden[0]);*/
 				
 			}else System.out.println("La matriz de coeficiente no es inversible(Determinante <> 0). No es posible continuar");
@@ -59,7 +55,7 @@ public class Main {
 		}
 	}
 	public static void mostrarResultado(double b[], int n) {
-		System.out.println("\nMuestra resultado x[]:");
+		System.out.println("\nMestra resultado x[]:");
 		for(int c=0; c<n ;c++) {
 			System.out.print(b[c]+"\t");
 		}

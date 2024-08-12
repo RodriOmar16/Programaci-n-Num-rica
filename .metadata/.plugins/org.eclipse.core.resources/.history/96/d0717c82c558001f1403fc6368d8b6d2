@@ -59,7 +59,7 @@ public class Main {
 		}
 	}
 	public static void mostrarResultado(double b[], int n) {
-		System.out.println("\nMuestra resultado x[]:");
+		System.out.println("\nMestra resultado x[]:");
 		for(int c=0; c<n ;c++) {
 			System.out.print(b[c]+"\t");
 		}

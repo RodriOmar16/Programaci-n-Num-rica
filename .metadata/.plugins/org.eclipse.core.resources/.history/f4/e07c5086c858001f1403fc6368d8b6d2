@@ -298,6 +298,7 @@ public class Matriz {
 		}
 		return x;
 	}
+
 	//RESOLUCION DE SISTEMAS TRIANGULARES SUPERIORES
 	public double[] resolucionSistTriangularSuperior(double A[][], int n, double b[][]) {
 		//int n = this.orden[0];
