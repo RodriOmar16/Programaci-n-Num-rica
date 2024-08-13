@@ -39,7 +39,7 @@ public class Matriz {
 	public void setMatrizTermIndep(double[][] a, int n){
 		this.termIndep = new double[n][1];
 		for(int f=0; f<n ;f++) {
-			this.termIndep[f][1] = a[n][1];
+			this.termIndep[f][0] = a[f][0];
 			
 		}
 	}
@@ -198,7 +198,7 @@ public class Matriz {
 		
 		return Math.sqrt(acu);
 	}
-	//CALCULA LA NORMA DE FROBENIUS O EUCLIDEA DE LA MATRIZ
+	//CALCULA LA NORMA 1 DE LA MATRIZ
 	private double norma1Matriz(double a[][], int n, int m) {
 		double may, acu = 0;
 		for(int i=0; i<n ;i++) {
@@ -217,7 +217,7 @@ public class Matriz {
 		}
 		return may;
 	}
-	//CALCULA LA NORMA DE FROBENIUS O EUCLIDEA DE LA MATRIZ
+	//CALCULA LA NORMA INFINITO DE UNA MATRIZ
 	private double normaInfinitoMatriz(double a[][], int n, int m) {
 		double may, acu = 0;
 		for(int j=0; j<m ;j++) {
@@ -558,11 +558,11 @@ public class Matriz {
 		//Comienza la eliminación
 		for(int k=0; k<n-1 ;k++) {
 			//realizo privoteo de ser necesario
-			/*if(G[k][k] == 0){
+			if(G[k][k] == 0){
 				G = pivotearNormal(G,n,n+1, k);
-			}*/
+			}
 			//G = pivotearParcial(G,n,n+1, k);
-			G = pivotearCompleto(G,n,n+1, k);
+			//G = pivotearCompleto(G,n,n+1, k);
 			for(int i=k+1; i<n ;i++) {
 				m = (G[i][k])/(G[k][k]);
 				G[i][k] = 0;
@@ -860,4 +860,106 @@ public class Matriz {
 		
 		return x;
 	}
+	
+	
+	//SUMA DE MATRICES
+	private double[][] sumaMatrices(double A[][], int n, int m, double B[][], int n1, int m1){ 
+		double C[][] = new double[n][m];
+		if(n==n1 && m==m1){
+			for(int f=0; f<n ;f++){
+				for(int c=0; c<m ;c++){
+					C[f][c] = A[f][c] + B[f][c];
+				}
+			}
+		}else{ System.out.println("El orden de las matrices son distintos."); }
+		
+		/*System.out.println("Suma de Matrices");
+		for(int f=0; f<n ;f++) {
+			System.out.println("");
+			for(int c=0; c<m ;c++) {
+				System.out.print(C[f][c]+"\t");
+			}
+		}*/
+		
+		return C;
+	}
+	//PRODUCTOS DE MATRICES
+	private double[][] productoMatricial(double A[][], int n, int m, double B[][], int n1, int m1){ //multiplica 2 matrices
+		double C[][] = new double[0][0];
+		int k,i,j; double acu=0;
+		if(m == n1){//si son de igual orden resuelve el producto entre A y B
+			//n2 = n;		m2 = m1;
+			 C = new double[n][m1];
+			for(i=0; i<n ;i++){
+				for(j=0; j<m1 ;j++){
+					for(k=0; k<m ;k++)
+						acu += (A[i][k] * B[k][j]);
+					C[i][j] = acu;	acu=0;
+				}
+			}
+		}else{ System.out.println("La cantidad de filas de A ni es igual a la cantidad de columnas de B."); }
+		
+		/*System.out.println("Producto Matricial");
+		for(int f=0; f<n ;f++) {
+			System.out.println("");
+			for(int c=0; c<m1 ;c++) {
+				System.out.print(C[f][c]+"\t");
+			}
+		}*/
+		
+		return C;
+	}
+	//PRODUCTO DE UN ESCALAR POR UNA MATRIZ
+	private double[][] productoX1Escalar(double A[][],int n, int m, double k){ //multiplicar un escalar por una matriz
+		double C[][] = new double[n][m];
+		for(int f=0; f<n ;f++) {
+			for(int c=0; c<m ;c++)	
+				{C[f][c] = A[f][c] * k;}
+		}
+		
+		/*System.out.println("Producto por 1 escalar: "+k);
+		for(int f=0; f<n ;f++) {
+			System.out.println("");
+			for(int c=0; c<m ;c++) {
+				System.out.print(C[f][c]+"\t");
+			}
+		}*/
+		
+		return C;
+	}
+	//CONVIERTE A MATRIZ DADO QUE ESTOY TRABAJANDO CON MATRICES
+	private double[][] convertirAmatriz(double x[], int n, int nvo){
+		double xM[][] = new double[n][nvo];
+		for(int i=0; i<n ;i++) {
+			xM[i][nvo-1] = x[i];
+		}
+		return xM;
+	}
+
+	//MEJORAMIENTO ITERATIVO
+	public double[][] mejoramientoIterativo(double x0[][], int nx0, double epsilon){
+		int n = this.orden[0];
+		double b[][] = this.termIndep,
+			   r[][] = new double[n][1],
+			   z0[][] = new double[n][1],
+			   normaResiduo;
+		Matriz A = new Matriz(n,n);
+		A.setMatrizCoef(this.matrizCoef, n,n);
+		
+		r=sumaMatrices(b, n, 1, productoX1Escalar(productoMatricial(A.getMatrizCoef(),n,n,x0,nx0,1),n,1,-1),n,1);	
+		normaResiduo = norma1Matriz(r, n, 1);
+		
+		while(normaResiduo != 0 || normaResiduo >= epsilon) {
+			A.setMatrizTermIndep(r, n);
+			z0 = convertirAmatriz(A.eliminacionGaussiana(),n,1);
+			x0 = sumaMatrices(x0,n,1,z0,n,1); //x0 + z0
+			
+			r=sumaMatrices(b, n, 1, productoX1Escalar(productoMatricial(A.getMatrizCoef(),n,n,x0,nx0,1),n,1,-1),n,1);
+			normaResiduo = norma1Matriz(r, n, 1);
+		}
+		
+		return x0;
+	}
+
+	//
 }
