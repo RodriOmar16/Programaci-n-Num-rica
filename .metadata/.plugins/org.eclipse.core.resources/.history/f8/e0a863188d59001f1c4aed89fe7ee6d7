@@ -14,7 +14,7 @@ public class Main {
 			double det = a.detMatriz(2);
 			//System.out.println("det: "+ det);
 			if(det != 0) {
-				double x[] = new double[orden[0]];
+				//double x[] = new double[orden[0]];
 				//x = a.resolucionSistDiagonal();
 				//x = a.resolucionSistTriangularSuperior(a.getMatrizCoef(),orden[0],a.getMatrizTermIndep());
 				//x = a.resolucionSistTriangularInferior(a.getMatrizCoef(),orden[0],a.getMatrizTermIndep());
@@ -53,8 +53,7 @@ public class Main {
 				
 				//a.diagonalmenteDominante();
 				
-				x = a.jacobi(0.001);
-				mostrarResultado(x,orden[0]);
+				a.jacobi(0.001);
 				
 			}else System.out.println("La matriz de coeficiente no es inversible(Determinante <> 0). No es posible continuar");
 		}else {

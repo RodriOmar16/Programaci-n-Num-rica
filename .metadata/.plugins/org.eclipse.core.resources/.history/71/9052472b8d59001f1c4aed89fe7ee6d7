@@ -53,8 +53,8 @@ public class Main {
 				
 				//a.diagonalmenteDominante();
 				
-				x = a.jacobi(0.001);
-				mostrarResultado(x,orden[0]);
+				a.jacobi(0.001);
+				x = 
 				
 			}else System.out.println("La matriz de coeficiente no es inversible(Determinante <> 0). No es posible continuar");
 		}else {

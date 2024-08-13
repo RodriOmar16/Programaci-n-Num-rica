@@ -1,5 +1,4 @@
 
-import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Matriz {
@@ -1040,74 +1039,37 @@ public class Matriz {
 		}else System.out.println("NO es DIAGONALMENTE dominante.");
 	}
 	
-	public double[] vectorInicial(int n) {
-		double[] x = new double[n];
-		/*Scanner teclado = new Scanner(System.in);
-		System.out.println("Ingresar valores iniciales:");
+	private double[] vectorInicial(int n) {
+		double x[] = new double[n];
+		Scanner teclado = new Scanner(System.in);
 		for(int i=0; i<n ;i++) {
-			System.out.println("Ingresar elemento["+(i+1)+"]: ");
-			try {
-	            if (teclado.hasNextDouble()) {
-	            	x[i] = teclado.nextDouble();
-	            } else {
-	                System.out.println("Entrada inválida. No se ingresó un número de tipo double.");
-	            }
-	        } catch (NoSuchElementException e) {
-	            System.out.println("Error: No se pudo leer la entrada.");
-	        } finally {
-	        	teclado.close();
-	        }
+			System.out.print("Ingresar elemento["+i+"]: ");
+			x[i] = teclado.nextDouble();
 		}
-	
-		teclado.close();*/
-		x[0] = 0; x[1] = 0; x[2] = 0;
+		
+		teclado.close();
 		return x;
 	}
 	
 	//METODO DE JACOBI
-	public double[] jacobi(double epsilon) {
+	public double[] jacobi() {
 		int n = this.orden[0], i;
-		double x[] = new double[n], acu, acu2,
-				x0[] = new double[n],
-				xDif[] = new double[n],
-				norma = 1000;
+		double x[] = new double[n], acu, acu2;
+		
 		//AVISO
 		if(!esDiagonalmenteDominante(this.matrizCoef, n)) {
 			System.out.println("La matriz NO es diagonalmente dominante puede no converger.");
 		}
 		
-		//Ingreso los valores iniciales
-		x = vectorInicial(n);
-		
 		//Comienza el proceso
-		while(norma>=epsilon) {
-			i=0;
-			do {
-				//x0 = x
-				System.out.println("Muestra de x0, vuelta i = "+i);
-				for(int j=0; j<n ;j++) {
-					 x0[i] = x[i];
-					 System.out.print(x0[i]+"\t");
-				}
-				
-				//Aplico la fórmula de Jacobi para ir encontrando nuevos elementos
-				acu = 0; acu2 = 0;
-				for(int j=0; j<i ;j++) {
-					acu += (this.matrizCoef[i][j] * x0[j]); 
-				}
-				for(int j=i+1; j<n ;j++) {
-					acu += (this.matrizCoef[i][j] * x0[j]); 
-				}
-				x[i] = (this.termIndep[i][0] - acu - acu2)/this.matrizCoef[i][i];
-				
-				//realizo la diferencia
-				for(int j=0; j<n ;j++) {
-					xDif[i] = x[i] - x0[i];
-				}
-				norma = norma2Vector(xDif,n);
-				i++;
-			}while(i<n && norma>=epsilon);
-		}
+		i=0;
+		do {
+			acu = 0; acu2 = 0;
+			for(int j=0; j<i ;j++) {
+				acu += (this.matrizCoef[i][j] * ); 
+			}
+			x[i] = (this.termIndep[i][0] - acu - acu2)/this.matrizCoef[i][i]; 
+		}while(i<n);
 		
 		return x;
 	}

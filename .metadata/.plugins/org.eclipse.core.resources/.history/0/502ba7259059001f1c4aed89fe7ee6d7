@@ -1070,7 +1070,7 @@ public class Matriz {
 		double x[] = new double[n], acu, acu2,
 				x0[] = new double[n],
 				xDif[] = new double[n],
-				norma = 1000;
+				norma;
 		//AVISO
 		if(!esDiagonalmenteDominante(this.matrizCoef, n)) {
 			System.out.println("La matriz NO es diagonalmente dominante puede no converger.");
@@ -1080,34 +1080,32 @@ public class Matriz {
 		x = vectorInicial(n);
 		
 		//Comienza el proceso
-		while(norma>=epsilon) {
-			i=0;
-			do {
-				//x0 = x
-				System.out.println("Muestra de x0, vuelta i = "+i);
-				for(int j=0; j<n ;j++) {
-					 x0[i] = x[i];
-					 System.out.print(x0[i]+"\t");
-				}
-				
-				//Aplico la fórmula de Jacobi para ir encontrando nuevos elementos
-				acu = 0; acu2 = 0;
-				for(int j=0; j<i ;j++) {
-					acu += (this.matrizCoef[i][j] * x0[j]); 
-				}
-				for(int j=i+1; j<n ;j++) {
-					acu += (this.matrizCoef[i][j] * x0[j]); 
-				}
-				x[i] = (this.termIndep[i][0] - acu - acu2)/this.matrizCoef[i][i];
-				
-				//realizo la diferencia
-				for(int j=0; j<n ;j++) {
-					xDif[i] = x[i] - x0[i];
-				}
-				norma = norma2Vector(xDif,n);
-				i++;
-			}while(i<n && norma>=epsilon);
-		}
+		i=0;
+		do {
+			//x0 = x
+			System.out.println("Muestra de x0, vuelta i = "+i);
+			for(int j=0; j<n ;j++) {
+				 x0[i] = x[i];
+				 System.out.print(x0[i]+"\t");
+			}
+			
+			//Aplico la fórmula de Jacobi para ir encontrando nuevos elementos
+			acu = 0; acu2 = 0;
+			for(int j=0; j<i ;j++) {
+				acu += (this.matrizCoef[i][j] * x0[j]); 
+			}
+			for(int j=i+1; j<n ;j++) {
+				acu += (this.matrizCoef[i][j] * x0[j]); 
+			}
+			x[i] = (this.termIndep[i][0] - acu - acu2)/this.matrizCoef[i][i];
+			
+			//realizo la diferencia
+			for(int j=0; j<n ;j++) {
+				xDif[i] = x[i] - x0[i];
+			}
+			norma = norma2Vector(xDif,n);
+			i++;
+		}while(i<n && norma>=epsilon);
 		
 		return x;
 	}
