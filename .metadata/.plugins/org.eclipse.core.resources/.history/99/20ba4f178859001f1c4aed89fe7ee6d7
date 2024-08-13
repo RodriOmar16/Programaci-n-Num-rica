@@ -1033,11 +1033,5 @@ public class Matriz {
 		
 		return cumple;
 	}
-	public void diagonalmenteDominante() {
-		if(esDiagonalmenteDominante(this.matrizCoef, this.orden[0])) {
-			System.out.println("Si es DIAGONALMENTE dominante.");
-		}else System.out.println("NO es DIAGONALMENTE dominante.");
-	}
 	
-	//
 }

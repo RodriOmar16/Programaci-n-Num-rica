@@ -1038,6 +1038,4 @@ public class Matriz {
 			System.out.println("Si es DIAGONALMENTE dominante.");
 		}else System.out.println("NO es DIAGONALMENTE dominante.");
 	}
-	
-	//
 }

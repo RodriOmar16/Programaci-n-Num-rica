@@ -43,15 +43,14 @@ public class Main {
 				/*x = a.choleskyLLt();
 				mostrarResultado(x, orden[0]);*/
 				
-				//a.detInversa();
-				
 				/*double x[][] = new double[orden[0]][1];
 				x[0][0] = 2; 	x[1][0] = 1; 	x[2][0] = 1;
 				x = a.mejoramientoIterativo(x, orden[0], 0.001);
 				System.out.println("\nMuestra del r:");
 				mostrarMatriz(x,orden[0],1);*/
 				
-				//a.diagonalmenteDominante();				
+				//a.detInversa();
+				
 				
 			}else System.out.println("La matriz de coeficiente no es inversible(Determinante <> 0). No es posible continuar");
 		}else {

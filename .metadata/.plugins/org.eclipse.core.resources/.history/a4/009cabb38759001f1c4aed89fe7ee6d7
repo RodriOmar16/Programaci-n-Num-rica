@@ -396,6 +396,11 @@ public class Matriz {
 		return x;
 	}
 
+	public boolean condNSFactorizacion() {
+		boolean resp = true;
+		return resp;
+	}
+	
 	//FACTORIZACIÓN LU
 	public void factorizacionLU(){
 		int n = this.orden[0],
@@ -984,6 +989,7 @@ public class Matriz {
 		}
 		return xM;
 	}
+
 	//MEJORAMIENTO ITERATIVO
 	public double[][] mejoramientoIterativo(double x0[][], int nx0, double epsilon){
 		int n = this.orden[0];
@@ -1033,11 +1039,5 @@ public class Matriz {
 		
 		return cumple;
 	}
-	public void diagonalmenteDominante() {
-		if(esDiagonalmenteDominante(this.matrizCoef, this.orden[0])) {
-			System.out.println("Si es DIAGONALMENTE dominante.");
-		}else System.out.println("NO es DIAGONALMENTE dominante.");
-	}
 	
-	//
 }
