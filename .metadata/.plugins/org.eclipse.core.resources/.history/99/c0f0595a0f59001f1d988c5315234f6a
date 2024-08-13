@@ -873,6 +873,7 @@ public class Matriz {
 			I[i][i] = 1;
 		}
 		
+		//G = getMatrizAmpliadaInterno(this.matrizCoef, n, n, this.termIndep);
 		for(int i=0; i<n ;i++) {
 			for(int j=0; j<n ;j++) {
 				G[i][j] = this.matrizCoef[i][j];
@@ -882,13 +883,6 @@ public class Matriz {
 			}
 		}
 		
-		System.out.println("Mostras la matriz A|I : ");
-		for(int i=0; i<n ;i++) {
-			System.out.println("");
-			for(int j=0; j<n2 ;j++) {
-				System.out.print(G[i][j]+"\t");
-			}
-		}
 						
 		//comienzo el proceso
 		for(int k=0; k<n ;k++) {

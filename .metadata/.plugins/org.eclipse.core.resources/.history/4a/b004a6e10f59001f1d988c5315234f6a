@@ -49,7 +49,7 @@ public class Main {
 				System.out.println("\nMuestra del r:");
 				mostrarMatriz(x,orden[0],1);*/
 				
-				//a.detInversa();
+				a.detInversa();
 				
 				
 			}else System.out.println("La matriz de coeficiente no es inversible(Determinante <> 0). No es posible continuar");

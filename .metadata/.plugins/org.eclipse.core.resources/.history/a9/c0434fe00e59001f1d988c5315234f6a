@@ -865,7 +865,7 @@ public class Matriz {
 	public double[][] detInversa(){
 		int n = this.orden[0],n2=n*2, c;
 		double x[] = new double[n], 
-				G[][] = new double[n][n2],m,
+				G[][] = new double[n][n2],m
 				I[][] = new double[n][n];
 		
 		//Creo una matriz Identidad
@@ -873,31 +873,27 @@ public class Matriz {
 			I[i][i] = 1;
 		}
 		
+		//G = getMatrizAmpliadaInterno(this.matrizCoef, n, n, this.termIndep);
 		for(int i=0; i<n ;i++) {
 			for(int j=0; j<n ;j++) {
 				G[i][j] = this.matrizCoef[i][j];
 			}
 			for(int j=n; j<n2 ;j++) {
-				G[i][j] = I[i][j-3];
+				if(){
+					
+				}
 			}
 		}
 		
-		System.out.println("Mostras la matriz A|I : ");
-		for(int i=0; i<n ;i++) {
-			System.out.println("");
-			for(int j=0; j<n2 ;j++) {
-				System.out.print(G[i][j]+"\t");
-			}
-		}
 						
 		//comienzo el proceso
 		for(int k=0; k<n ;k++) {
 			//realiza pivoteo de ser necesario
 			if(G[k][k] == 0){
-				G = pivotearNormal(G,n,n2, k);
+				G = pivotearNormal(G,n,n+1, k);
 			}
 			
-			for(int j=k+1; j<n2 ;j++) {
+			for(int j=k+1; j<=n ;j++) {
 				G[k][j] = G[k][j]/G[k][k];
 			}
 			G[k][k] = G[k][k]/G[k][k];
@@ -905,15 +901,18 @@ public class Matriz {
 			for(int i=0; i<n ;i++) {
 				if(i!=k) {
 					m = G[i][k]/G[k][k];
-					for(int j=k; j<n2 ;j++) {
+					for(int j=k; j<=n ;j++) {
 						G[i][j] = G[i][j] - m * G[k][j];
 					}
 				}
 			}
 		}
-				
-		mostrarMatrizCoef(G, n,n2);
-		return G;
+		
+		for(int i=0; i<n ;i++) {
+			x[i] = G[i][n];
+		}
+		
+		mostrarMatrizAmpliada(G, n,n);
 	}
 	
 	//SUMA DE MATRICES
