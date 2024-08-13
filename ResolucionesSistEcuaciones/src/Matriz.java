@@ -289,8 +289,7 @@ public class Matriz {
 	private double met_Sarrus(double[][] A){//Método de la regla de Sarrus
 		return ((A[0][0]*A[1][1]*A[2][2])+(A[0][1]*A[1][2]*A[2][0])+(A[0][2]*A[1][0]*A[2][1])) + (-(A[0][2]*A[1][1]*A[2][0])-(A[0][0]*A[1][2]*A[2][1])-(A[0][1]*A[1][0]*A[2][2]));
 	}
-	
-	
+		
 	private double[][] menor_corres(double A[][],int n,int filk,int colk){ //calcula el menor correspondiente
 		double[][] M = new double[n-1][n-1];	int i=0,j,b=0,f,c, filas = n-1, columnas = filas;
 		
@@ -1084,10 +1083,10 @@ public class Matriz {
 			i=0;
 			do {
 				//x0 = x
-				System.out.println("Muestra de x0, vuelta i = "+i);
+				//System.out.println("Muestra de x0, vuelta i = "+i);
 				for(int j=0; j<n ;j++) {
-					 x0[i] = x[i];
-					 System.out.print(x0[i]+"\t");
+					 x0[j] = x[j];
+					 //System.out.print(x0[j]+"\t");
 				}
 				
 				//Aplico la fórmula de Jacobi para ir encontrando nuevos elementos
@@ -1102,7 +1101,7 @@ public class Matriz {
 				
 				//realizo la diferencia
 				for(int j=0; j<n ;j++) {
-					xDif[i] = x[i] - x0[i];
+					xDif[j] = x[j] - x0[j];
 				}
 				norma = norma2Vector(xDif,n);
 				i++;
@@ -1111,4 +1110,100 @@ public class Matriz {
 		
 		return x;
 	}
+	//GAUSS-SEIDEL
+	public double[] gaussSeidel(double epsilon) {
+		int n = this.orden[0], i;
+		double x[] = new double[n], acu, acu2,
+				x0[] = new double[n],
+				xDif[] = new double[n],
+				norma = 1000;
+		//AVISO
+		if(!esDiagonalmenteDominante(this.matrizCoef, n)) {
+			System.out.println("La matriz NO es diagonalmente dominante puede no converger.");
+		}
+		
+		//Ingreso los valores iniciales
+		x = vectorInicial(n);
+		
+		//Comienza el proceso
+		while(norma>=epsilon) {
+			i=0;
+			//x0 = x
+			System.out.print("\nx0:");
+			for(int j=0; j<n ;j++) {
+				 x0[j] = x[j];
+				 System.out.print(x[j]+"\t");
+			}
+			do {	
+				//System.out.println("Muestra de x0, vuelta i = "+i);
+				//Aplico la fórmula de Jacobi para ir encontrando nuevos elementos
+				acu = 0; acu2 = 0;
+				for(int j=0; j<i ;j++) {
+					acu += (this.matrizCoef[i][j] * x[j]); 
+				}
+				for(int j=i+1; j<n ;j++) {
+					acu += (this.matrizCoef[i][j] * x[j]); 
+				}
+				x[i] = (this.termIndep[i][0] - acu - acu2)/this.matrizCoef[i][i];
+				
+				i++;
+			}while(i<n);
+			//realizo la diferencia
+			for(int j=0; j<n ;j++) {
+				xDif[j] = x[j] - x0[j];
+			}
+			norma = norma2Vector(xDif,n);
+		}
+		
+		return x;
+	}
+	//SOBRERELAJACION (SOR)
+	public double[] metodoSOR(double epsilon, double w) {
+		int n = this.orden[0], i;
+		double x[] = new double[n], acu, acu2,
+				x0[] = new double[n],
+				xDif[] = new double[n],
+				norma = 1000;
+		//AVISO
+		if(!esDiagonalmenteDominante(this.matrizCoef, n)) {
+			System.out.println("La matriz NO es diagonalmente dominante puede no converger.");
+		}
+		
+		//Ingreso los valores iniciales
+		x = vectorInicial(n);
+		
+		//Comienza el proceso
+		while(norma>=epsilon) {
+			i=0;
+			//x0 = x
+			System.out.println("x0:");
+			for(int j=0; j<n ;j++) {
+				 x0[j] = x[j];
+				 System.out.print(x[j]+"\t");
+			}
+			do {	
+				//System.out.println("Muestra de x0, vuelta i = "+i);
+				//Aplico la fórmula de Jacobi para ir encontrando nuevos elementos
+				acu = 0; acu2 = 0;
+				for(int j=0; j<i ;j++) {
+					acu += (this.matrizCoef[i][j] * x[j]); 
+				}
+				for(int j=i+1; j<n ;j++) {
+					acu += (this.matrizCoef[i][j] * x[j]); 
+				}
+				x[i] = (1-w)*x[i] + w * (this.termIndep[i][0] - acu - acu2)/this.matrizCoef[i][i];
+				
+				i++;
+			}while(i<n);
+			//realizo la diferencia
+			for(int j=0; j<n ;j++) {
+				xDif[j] = x[j] - x0[j];
+			}
+			norma = norma2Vector(xDif,n);
+		}
+		
+		return x;
+	}
+	
+	//
 }

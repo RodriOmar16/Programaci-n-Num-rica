@@ -53,7 +53,13 @@ public class Main {
 				
 				//a.diagonalmenteDominante();
 				
-				x = a.jacobi(0.001);
+				/*x = a.jacobi(0.001);
+				mostrarResultado(x,orden[0]);*/
+				
+				/*x = a.gaussSeidel(0.001);
+				mostrarResultado(x,orden[0]);*/
+				
+				x = a.metodoSOR(0.001, 0.8);
 				mostrarResultado(x,orden[0]);
 				
 			}else System.out.println("La matriz de coeficiente no es inversible(Determinante <> 0). No es posible continuar");
