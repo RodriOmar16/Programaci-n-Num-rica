@@ -1015,29 +1015,5 @@ public class Matriz {
 		return x0;
 	}
 
-	//DETERMINA SI LA MATRIZ ES DIAGONALMENTE DOMINANTE - COND. SUFICIENTE
-	private boolean esDiagonalmenteDominante(double a[][], int n) {
-		boolean cumple = true;
-		double may, acu;
-		int i=0, j;
-		
-		while(i<n && cumple) {
-			may = Math.abs(a[i][i]);
-			acu = 0;
-			j=0;
-			while(j<n) {
-				if(i!=j) {
-					acu += Math.abs(a[i][j]);
-				}
-				j++;
-			}
-			if(Math.abs(acu) >= may) {
-				cumple = false;
-			}
-			i++;
-		}
-		
-		return cumple;
-	}
-	
+	//
 }
