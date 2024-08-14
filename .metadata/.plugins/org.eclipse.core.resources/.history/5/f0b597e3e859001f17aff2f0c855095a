@@ -1226,7 +1226,7 @@ public class Matriz {
 				if(Math.abs(r[i][0]) > may) {
 					may = Math.abs(r[i][0]);
 					pos = i;
-					System.out.println("pos: "+pos);
+					System.println();
 				}
 			}
 			x0[pos][0] = x0[pos][0] + (r[pos][0]/this.matrizCoef[pos][pos])  ;

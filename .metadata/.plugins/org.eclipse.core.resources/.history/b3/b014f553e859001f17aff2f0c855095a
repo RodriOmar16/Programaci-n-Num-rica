@@ -1212,6 +1212,7 @@ public class Matriz {
 		int n = this.orden[0], pos;
 		double b[][] = this.termIndep,
 			   r[][] = new double[n][1],
+			   z0[][] = new double[n][1],
 			   normaResiduo, may;
 		Matriz A = new Matriz(n,n);
 		A.setMatrizCoef(this.matrizCoef, n,n);
@@ -1220,17 +1221,19 @@ public class Matriz {
 		normaResiduo = norma1Matriz(r, n, 1);
 		may = Math.abs(r[0][0]); pos = 0;
 		while(normaResiduo >= epsilon) {
-			may = Math.abs(r[0][0]); pos = 0;
 			//busco la pos del mayor
-			for(int i=1; i<n ;i++) {
+			for(int i=0; i<n ;i++) {
 				if(Math.abs(r[i][0]) > may) {
 					may = Math.abs(r[i][0]);
 					pos = i;
-					System.out.println("pos: "+pos);
 				}
 			}
 			x0[pos][0] = x0[pos][0] + (r[pos][0]/this.matrizCoef[pos][pos])  ;
-
+			
+			A.setMatrizTermIndep(r, n);
+			z0 = convertirAmatriz(A.eliminacionGaussiana(),n,1);
+			x0 = sumaMatrices(x0,n,1,z0,n,1); //x0 + z0
+			
 			r=sumaMatrices(b, n, 1, productoX1Escalar(productoMatricial(A.getMatrizCoef(),n,n,x0,nx0,1),n,1,-1),n,1);
 			normaResiduo = norma1Matriz(r, n, 1);
 		}
