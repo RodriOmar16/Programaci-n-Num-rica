@@ -1086,7 +1086,7 @@ public class Matriz {
 				//System.out.println("Muestra de x0, vuelta i = "+i);
 				for(int j=0; j<n ;j++) {
 					 x0[j] = x[j];
-					 //System.out.print(x0[j]+"\t");
+					 System.out.print(x0[j]+"\t");
 				}
 				
 				//Aplico la fórmula de Jacobi para ir encontrando nuevos elementos
@@ -1169,39 +1169,41 @@ public class Matriz {
 			System.out.println("La matriz NO es diagonalmente dominante puede no converger.");
 		}
 		
-		//Ingreso los valores iniciales
-		x = vectorInicial(n);
-		
-		//Comienza el proceso
-		while(norma>=epsilon) {
-			i=0;
-			//x0 = x
-			System.out.println("x0:");
-			for(int j=0; j<n ;j++) {
-				 x0[j] = x[j];
-				 System.out.print(x[j]+"\t");
-			}
-			do {	
-				//System.out.println("Muestra de x0, vuelta i = "+i);
-				//Aplico la fórmula de Jacobi para ir encontrando nuevos elementos
-				acu = 0; acu2 = 0;
-				for(int j=0; j<i ;j++) {
-					acu += (this.matrizCoef[i][j] * x[j]); 
+		if(0 < w && w < 2) {
+
+			//Ingreso los valores iniciales
+			x = vectorInicial(n);
+			
+			//Comienza el proceso
+			while(norma>=epsilon) {
+				i=0;
+				//x0 = x
+				System.out.println("x0:");
+				for(int j=0; j<n ;j++) {
+					 x0[j] = x[j];
+					 System.out.print(x[j]+"\t");
 				}
-				for(int j=i+1; j<n ;j++) {
-					acu += (this.matrizCoef[i][j] * x[j]); 
+				do {	
+					//System.out.println("Muestra de x0, vuelta i = "+i);
+					//Aplico la fórmula de Jacobi para ir encontrando nuevos elementos
+					acu = 0; acu2 = 0;
+					for(int j=0; j<i ;j++) {
+						acu += (this.matrizCoef[i][j] * x[j]); 
+					}
+					for(int j=i+1; j<n ;j++) {
+						acu += (this.matrizCoef[i][j] * x[j]); 
+					}
+					x[i] = (1-w)*x[i] + w * (this.termIndep[i][0] - acu - acu2)/this.matrizCoef[i][i];
+					
+					i++;
+				}while(i<n);
+				//realizo la diferencia
+				for(int j=0; j<n ;j++) {
+					xDif[j] = x[j] - x0[j];
 				}
-				x[i] = (1-w)*x[i] + w * (this.termIndep[i][0] - acu - acu2)/this.matrizCoef[i][i];
-				
-				i++;
-			}while(i<n);
-			//realizo la diferencia
-			for(int j=0; j<n ;j++) {
-				xDif[j] = x[j] - x0[j];
+				norma = norma2Vector(xDif,n);
 			}
-			norma = norma2Vector(xDif,n);
-		}
-		
+		}else System.out.println("No es posible continuar el procedimiento con ese w inválido.");		
 		return x;
 	}
 	
