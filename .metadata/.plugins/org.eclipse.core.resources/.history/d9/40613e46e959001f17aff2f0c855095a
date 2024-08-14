@@ -1226,17 +1226,11 @@ public class Matriz {
 				if(Math.abs(r[i][0]) > may) {
 					may = Math.abs(r[i][0]);
 					pos = i;
+					System.out.println("pos: "+pos);
 				}
 			}
-			//actualizo el mejor valor
-			x0[pos][0] = x0[pos][0] + (r[pos][0]/this.matrizCoef[pos][pos]);
-			
-			//muestro del paso
-			System.out.println("");
-			for(int i=0; i<n ;i++) {
-				System.out.println(x0[i][0]+"\t");
-			}
-						
+			x0[pos][0] = x0[pos][0] + (r[pos][0]/this.matrizCoef[pos][pos])  ;
+
 			r=sumaMatrices(b, n, 1, productoX1Escalar(productoMatricial(A.getMatrizCoef(),n,n,x0,nx0,1),n,1,-1),n,1);
 			normaResiduo = norma1Matriz(r, n, 1);
 		}

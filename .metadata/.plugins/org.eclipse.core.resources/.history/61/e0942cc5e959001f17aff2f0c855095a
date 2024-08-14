@@ -1232,7 +1232,6 @@ public class Matriz {
 			x0[pos][0] = x0[pos][0] + (r[pos][0]/this.matrizCoef[pos][pos]);
 			
 			//muestro del paso
-			System.out.println("");
 			for(int i=0; i<n ;i++) {
 				System.out.println(x0[i][0]+"\t");
 			}
