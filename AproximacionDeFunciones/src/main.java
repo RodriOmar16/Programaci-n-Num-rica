@@ -7,6 +7,10 @@ public class main {
 		p.cargarPtos();
 		System.out.println("\nMuestra de los ptos:");
 		p.mostrarPtos();
+		
+		p.vanDerMonde();
+		System.out.println("Mostrar Polinomio interpolante por Van Der Monde:");
+		p.mostrarPolinomioInterpolante();
 
 	}
 
