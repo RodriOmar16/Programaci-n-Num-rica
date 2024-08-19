@@ -1,4 +1,7 @@
 import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class PolinomioAprox {
 	public Matriz MatrizInterpolante; //matriz de coef
@@ -30,7 +33,7 @@ public class PolinomioAprox {
 	}
 	
 	public double[] getPolinomioInterpolante() { return this.PolinomioInterpolante; }
-	public void getPolinomioInterpolante(double p[]) {
+	public void setPolinomioInterpolante(double p[]) {
 		int n = this.PolinomioInterpolante.length;
 		for(int i=0; i<n ;i++) {
 			this.PolinomioInterpolante[i] = p[i];
@@ -125,5 +128,134 @@ public class PolinomioAprox {
 			this.PolinomioInterpolante[(n-1-i)] = aux[i];
 		}
 	}
+	
+	 // Método para multiplicar dos polinomios
+    public List<Double> multiplyPolynomials(List<Double> poly1, List<Double> poly2) {
+        int degree1 = poly1.size();
+        int degree2 = poly2.size();
+        Double[] result = new Double[degree1 + degree2 - 1];
+        Arrays.fill(result, 0.0);
+        
+        for (int i = 0; i < degree1; i++) {
+            for (int j = 0; j < degree2; j++) {
+                result[i + j] += poly1.get(i) * poly2.get(j);
+            }
+        }
+        
+        return Arrays.asList(result);
+    }
+    // Método para calcular el producto de n binomios (x - xi)
+    public List<Double> calculateBinomialProduct(double[] roots) {
+        List<Double> poly = new ArrayList<>(Arrays.asList(1.0, -roots[0]));
+        
+        for (int i = 1; i < roots.length; i++) {
+            List<Double> binomial = new ArrayList<>(Arrays.asList(1.0, -roots[i]));
+            poly = multiplyPolynomials(poly, binomial);
+        }
+        
+        return poly;
+    }
+    //COLOCACION POR LAGRANGE
+    private double[][] obternerPolinomiosBasicosLgrange() {
+		int cant = this.cantidad,
+			k;
+    	double m[][] = new double[cant][cant],
+    			x[]  = new double[cant-1],
+    			d    = 1;
+    	
+    	// Lista de valores xi
+    	for(int i=0; i<cant ;i++) {
+    		k = 0; d=1;
+    		for(int j=0; j<cant ;j++) {
+    			if(i!=j) {
+    				x[k] = this.ListaPtos[j][0];
+    				k++;
+    				d *= (this.ListaPtos[i][0] - this.ListaPtos[j][0]);
+    			}
+    		}
+    		// Calcular el producto de los binomios (x - xi)
+            List<Double> polynomial = calculateBinomialProduct(x);
+            int n = polynomial.size();
+
+            //Divido por la constante
+            for(int e=0; e<n ;e++) {
+            	polynomial.set(e, polynomial.get(e)/d);
+            }
+            //Forma la matriz de Polinomios básicos
+            for(int c=0; c<cant ;c++) {
+            	//this.MatrizInterpolante.setElemento(i, f, polynomial.get(f));
+            	m[i][c] = polynomial.get(c);
+            }
+            //this.MatrizInterpolante.mostrarMatriz(1);
+    	}
+    	       
+        return m;
+    }
+    private double[] construirMatrizLagrange(double pb[][], int n) {
+    	double m[] = new double[n], aux, yM[][] = new double[n][1], pbAux[][] = new double[n][n];
+    	Matriz A = new Matriz(n, n), B = new Matriz(3,1); 
+    	int f;
+    	//Creo una copia de seguridad
+    	for(int i=0; i<n ;i++) {
+    		for(int j=0; j<n ;j++) {
+    			pbAux[i][j] = pb[i][j];
+    		}
+    	}
+
+    	//Transponer
+    	for(f=0; f<n ;f++){
+    		for(int c=f; c<n ;c++) {
+    			if(f!=c) {
+    				aux         = pbAux[f][c];
+    				pbAux[f][c] = pbAux[c][f];
+    				pbAux[c][f] = aux;
+    			}
+    		}
+    	}
+    	
+    	//Invertir filas
+    	f = 0;
+    	while(f<(n-1-f)) {
+    		for(int c=0; c<n ;c++) {
+    			aux            	  = pbAux[f][c];
+    			pbAux[f][c]       = pbAux[(n-1-f)][c];
+    			pbAux[(n-1-f)][c] = aux;
+     		}
+    		f++;
+    	}
+
+    	//Formo el matriz yM para el producto Matricial
+    	for(int i=0; i<n ;i++) {
+    		yM[i][0] = this.ListaPtos[i][1];
+    	}
+    	
+    	A.setMatrizCoef(pbAux, n, n);
+    	B.setMatrizCoef(yM, n, 1);
+    	yM = A.prodMatricial(A, B);
+    	
+    	//Tranformo la matriz yM en un vector m, del polinomio
+    	for(int i=0; i<n ;i++){
+    		m[i] = yM[i][0];
+    	}
+    	
+    	return m;
+    }
+    private double[] determinarPolinomio(double pb[][], int n) {
+    	double m[] = new double[n];
+    	return m;    	
+    }
+    public void lagrange(int opc) {
+    	//Determino los polinmios básicos de lagrange
+    	int n = this.cantidad;
+    	double polBasicosLagrange[][] = new double[n][n];
+    	polBasicosLagrange = obternerPolinomiosBasicosLgrange();
+    	   	
+    	switch(opc) {
+    	case 1:
+    		this.PolinomioInterpolante = construirMatrizLagrange(polBasicosLagrange, n);  break;
+    	case 2: this.PolinomioInterpolante = determinarPolinomio(polBasicosLagrange, n);  break;
+    	}
+    }
+    
 
 }

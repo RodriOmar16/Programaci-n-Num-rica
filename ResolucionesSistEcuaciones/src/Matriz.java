@@ -933,6 +933,9 @@ public class Matriz {
 		return C;
 	}
 	//PRODUCTOS DE MATRICES
+	public double[][] prodMatricial(Matriz A, Matriz B){
+		return productoMatricial(A.getMatrizCoef(),A.getOrden()[0],A.getOrden()[1], B.getMatrizCoef(), B.getOrden()[0], B.getOrden()[1]);
+	}
 	private double[][] productoMatricial(double A[][], int n, int m, double B[][], int n1, int m1){ //multiplica 2 matrices
 		double C[][] = new double[0][0];
 		int k,i,j; double acu=0;
@@ -977,10 +980,10 @@ public class Matriz {
 		return C;
 	}
 	//CONVIERTE A MATRIZ DADO QUE ESTOY TRABAJANDO CON MATRICES
-	private double[][] convertirAmatriz(double x[], int n, int nvo){
-		double xM[][] = new double[n][nvo];
+	public double[][] convertirAmatriz(double x[], int n){
+		double xM[][] = new double[n][1];
 		for(int i=0; i<n ;i++) {
-			xM[i][nvo-1] = x[i];
+			xM[i][0] = x[i];
 		}
 		return xM;
 	}
@@ -999,7 +1002,7 @@ public class Matriz {
 		
 		while(normaResiduo != 0 || normaResiduo >= epsilon) {
 			A.setMatrizTermIndep(r, n);
-			z0 = convertirAmatriz(A.eliminacionGaussiana(),n,1);
+			z0 = convertirAmatriz(A.eliminacionGaussiana(),n);
 			x0 = sumaMatrices(x0,n,1,z0,n,1); //x0 + z0
 			
 			r=sumaMatrices(b, n, 1, productoX1Escalar(productoMatricial(A.getMatrizCoef(),n,n,x0,nx0,1),n,1,-1),n,1);

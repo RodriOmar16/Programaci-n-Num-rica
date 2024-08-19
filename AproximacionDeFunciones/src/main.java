@@ -8,10 +8,22 @@ public class main {
 		System.out.println("\nMuestra de los ptos:");
 		p.mostrarPtos();
 		
-		p.vanDerMonde();
+		/*p.vanDerMonde();
 		System.out.println("Mostrar Polinomio interpolante por Van Der Monde:");
+		p.mostrarPolinomioInterpolante();*/
+		
+		p.lagrange(1);
+		System.out.println("\nMostrar Polinomio interpolante por Lagrange:");
 		p.mostrarPolinomioInterpolante();
 
 	}
 
 }
+
+
+
+
+
+
+
+
