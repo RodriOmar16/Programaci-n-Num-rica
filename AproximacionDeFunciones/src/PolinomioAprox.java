@@ -42,7 +42,7 @@ public class PolinomioAprox {
 	
 	public double[][] getMatriz(){	return this.MatrizInterpolante.getMatrizCoef();  }
 	
-	//METODOS
+	//--------------------------------------------METODOS---------------------------------------------------------
 	public void cargarPtos(){
 		int n = this.cantidad;
 		Scanner teclado = new Scanner(System.in);
@@ -282,9 +282,7 @@ public class PolinomioAprox {
     	
     	//Copio las coordenadas de y = f(x)
     	for(int i=0; i<n ;i++) {
-    		d[i] 	= this.ListaPtos[i][1];
     		dAux[i] = this.ListaPtos[i][1];
-    		//System.out.println("d["+i+"]: "+d[i]);
     	}
     	
     	//Calculo las diferencias dividas
@@ -299,35 +297,35 @@ public class PolinomioAprox {
 
     	return dAux;
     }
-    
     //COLOCACION POR NEWTON
     public void newton() {
     	int tam = this.cantidad, k=0;
     	double d[] = new double[tam],
     		aux[]  = new double[tam-1],
-    		m[][]  = new double[tam][tam];
+    		aux2[],
+    		m[][]  = new double[tam][tam]/*,
+    		acu*/;
     	
     	d = diferenciasDivididas();
-    	   	
-    	m[0][0] = d[0];
-    	for(int c=1; c<tam ;c++) {
-    		m[0][c] = 0;
-    	}
     	
+    	m[0][0] = d[0];
+
     	for(int i=1; i<tam ;i++) {
     		k=0;
     		//armo los binomios
-    		for(int j=0; j<(tam-1) ;j++) {
+    		for(int j=0; j<i ;j++) {
         		aux[j] = this.ListaPtos[j][0];
-        		k++;
         	}
-    		for(int j=0; j<k ;j++) {
-    			System.out.print(aux[j]+"\t");
+    		//Utilizo un array auxiliar con distintos tamaños
+    		aux2 = new double[i];
+    		for(int j=0; j<i ;j++) {
+    			aux2[j] = aux[j];
     		}
+    		
         	// Calcular el producto de los binomios (x - xi)
-            List<Double> polynomial = calculateBinomialProduct(aux);
+            List<Double> polynomial = calculateBinomialProduct(aux2);
             int n = polynomial.size();
-
+            
             //Divido por la constante
             for(int e=0; e<n ;e++) {
             	polynomial.set(e, polynomial.get(e)*d[i]);
@@ -335,15 +333,15 @@ public class PolinomioAprox {
             //armo la matriz para sumar por columnas
             for(int j=0; j<tam ;j++) {
             	if(j<n) {
-            		m[i][j] = polynomial.get(j);
-            	}else m[i][j] = 0;
+            		m[i][j] = polynomial.get((n-1-j));
+            	}
             }          
     	} 
-        System.out.println("\nMuestra de la matriz - newton:");
-        for(int i=0; i<tam ;i++) {
+    	//calculo los coeficientes del polinomio interpolante
+        for(int j=0; j<tam ;j++) {
         	System.out.println("");
-        	for(int j=0 ; j<tam ;j++) {
-        		System.out.print(m[i][j]+"\t");
+        	for(int i=0 ; i<tam ;i++) {
+        		this.PolinomioInterpolante[j] += m[i][j];
         	}
         }
     }
