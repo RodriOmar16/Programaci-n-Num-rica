@@ -34,7 +34,7 @@ public class BinomialProductDouble {
     
     public static void main(String[] args) {
         // Lista de valores xi
-        double[] roots = {2.0, 3.0};
+        double[] roots = {1.0, 0};
         
         // Calcular el producto de los binomios (x - xi)
         List<Double> polynomial = calculateBinomialProduct(roots);

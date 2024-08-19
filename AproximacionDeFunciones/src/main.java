@@ -15,10 +15,13 @@ public class main {
 		/*p.lagrange(1);
 		System.out.println("\nMostrar Polinomio interpolante por Lagrange:");
 		p.mostrarPolinomioInterpolante();*/
-		p.lagrange(2);
+		/*p.lagrange(2);
 		System.out.println("\nMostrar Polinomio interpolante por Lagrange:");
-		p.mostrarPolinomioInterpolante();
+		p.mostrarPolinomioInterpolante();*/
 		
+		p.newton();
+		System.out.println("\nMostrar Polinomio interpolante por Newton:");
+		p.mostrarPolinomioInterpolante();
 
 	}
 

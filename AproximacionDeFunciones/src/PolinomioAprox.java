@@ -275,6 +275,76 @@ public class PolinomioAprox {
     	case 2: this.PolinomioInterpolante = determinarPolinomio(polBasicosLagrange, n);  break;
     	}
     }
-    
 
+    private double[] diferenciasDivididas() {
+    	int n = this.cantidad;
+    	double d[] = new double[n], dAux[] = new double[n];
+    	
+    	//Copio las coordenadas de y = f(x)
+    	for(int i=0; i<n ;i++) {
+    		d[i] 	= this.ListaPtos[i][1];
+    		dAux[i] = this.ListaPtos[i][1];
+    		//System.out.println("d["+i+"]: "+d[i]);
+    	}
+    	
+    	//Calculo las diferencias dividas
+    	for(int i=0; i<n ;i++) {
+    		for(int j=0; j<n ;j++) {
+    			d[j] = dAux[j];
+    		}
+    		for(int j=i; j<(n-1) ;j++) {
+    			dAux[j+1] = (d[j+1] - d[j])/(this.ListaPtos[j+1][0] - this.ListaPtos[j-i][0]);
+    		}
+    	}
+
+    	return dAux;
+    }
+    
+    //COLOCACION POR NEWTON
+    public void newton() {
+    	int tam = this.cantidad, k=0;
+    	double d[] = new double[tam],
+    		aux[]  = new double[tam-1],
+    		m[][]  = new double[tam][tam];
+    	
+    	d = diferenciasDivididas();
+    	   	
+    	m[0][0] = d[0];
+    	for(int c=1; c<tam ;c++) {
+    		m[0][c] = 0;
+    	}
+    	
+    	for(int i=1; i<tam ;i++) {
+    		k=0;
+    		//armo los binomios
+    		for(int j=0; j<(tam-1) ;j++) {
+        		aux[j] = this.ListaPtos[j][0];
+        		k++;
+        	}
+    		for(int j=0; j<k ;j++) {
+    			System.out.print(aux[j]+"\t");
+    		}
+        	// Calcular el producto de los binomios (x - xi)
+            List<Double> polynomial = calculateBinomialProduct(aux);
+            int n = polynomial.size();
+
+            //Divido por la constante
+            for(int e=0; e<n ;e++) {
+            	polynomial.set(e, polynomial.get(e)*d[i]);
+            }
+            //armo la matriz para sumar por columnas
+            for(int j=0; j<tam ;j++) {
+            	if(j<n) {
+            		m[i][j] = polynomial.get(j);
+            	}else m[i][j] = 0;
+            }          
+    	} 
+        System.out.println("\nMuestra de la matriz - newton:");
+        for(int i=0; i<tam ;i++) {
+        	System.out.println("");
+        	for(int j=0 ; j<tam ;j++) {
+        		System.out.print(m[i][j]+"\t");
+        	}
+        }
+    }
 }
