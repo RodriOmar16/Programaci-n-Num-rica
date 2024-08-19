@@ -241,7 +241,26 @@ public class PolinomioAprox {
     	return m;
     }
     private double[] determinarPolinomio(double pb[][], int n) {
-    	double m[] = new double[n];
+    	double m[] = new double[n], pbAux[][] = new double[n][n];
+    	
+    	//Creo una copia de seguridad
+    	for(int i=0; i<n ;i++) {
+    		for(int j=0; j<n ;j++) {
+    			pbAux[i][j] = pb[i][j];
+    		}
+    	}
+    	//Multiplica cada uno de los polinomios básicos obtenidos por el f(x)
+    	for(int i=0; i<n ;i++) {
+    		for(int j=0; j<n ;j++) {
+    			pbAux[i][j] *= this.ListaPtos[i][1]; 
+    		}
+    	}
+    	//Sumo los coeficientes para obtener el polinomio final
+    	for(int j=0; j<n ;j++) {
+    		for(int i=0; i<n ;i++) {
+    			m[(n-1-j)] += pbAux[i][j];
+    		}
+    	}
     	return m;    	
     }
     public void lagrange(int opc) {
