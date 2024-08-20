@@ -224,6 +224,14 @@ public class PolinomioAprox {
     		f++;
     	}
 
+    	System.out.println("\nMatriz de lagrange:");
+    	for(int i=0; i<n ;i++) {
+    		System.out.println("");
+    		for(int j=0; j<n ;j++) {
+    			System.out.print(pbAux[i][j]+"\t");
+    		}
+    	}
+    	
     	//Formo el matriz yM para el producto Matricial
     	for(int i=0; i<n ;i++) {
     		yM[i][0] = this.ListaPtos[i][1];
@@ -285,11 +293,13 @@ public class PolinomioAprox {
     		dAux[i] = this.ListaPtos[i][1];
     	}
     	
-    	//Calculo las diferencias dividas
+    	//Calculo las diferencias divididas
     	for(int i=0; i<n ;i++) {
+    		//me guardo una copia que se destruye, uso valores viejos y nuevos
     		for(int j=0; j<n ;j++) {
     			d[j] = dAux[j];
     		}
+    		//armo el array de diferencias divididas
     		for(int j=i; j<(n-1) ;j++) {
     			dAux[j+1] = (d[j+1] - d[j])/(this.ListaPtos[j+1][0] - this.ListaPtos[j-i][0]);
     		}
