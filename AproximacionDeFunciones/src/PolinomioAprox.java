@@ -296,7 +296,7 @@ public class PolinomioAprox {
     	//Calculo las diferencias divididas
     	for(int i=0; i<n ;i++) {
     		//Muestro en cada paso como obtiene
-    		System.out.println("\nVuelta Dif. Divididas i = "+i);
+    		System.out.println("\nDif. Divididas de orden "+i);
     		for(int j=0; j<n ;j++) {
     			System.out.print(dAux[j]+", ");
     		}
@@ -359,7 +359,6 @@ public class PolinomioAprox {
     	} 
     	//calculo los coeficientes del polinomio interpolante
         for(int j=0; j<tam ;j++) {
-        	System.out.println("");
         	for(int i=0 ; i<tam ;i++) {
         		this.PolinomioInterpolante[j] += m[i][j];
         	}
