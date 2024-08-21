@@ -295,6 +295,11 @@ public class PolinomioAprox {
     	
     	//Calculo las diferencias divididas
     	for(int i=0; i<n ;i++) {
+    		//Muestro en cada paso como obtiene
+    		System.out.println("\nVuelta Dif. Divididas i = "+i);
+    		for(int j=0; j<n ;j++) {
+    			System.out.print(dAux[j]+", ");
+    		}
     		//me guardo una copia que se destruye, uso valores viejos y nuevos
     		for(int j=0; j<n ;j++) {
     			d[j] = dAux[j];
@@ -304,7 +309,12 @@ public class PolinomioAprox {
     			dAux[j+1] = (d[j+1] - d[j])/(this.ListaPtos[j+1][0] - this.ListaPtos[j-i][0]);
     		}
     	}
-
+    	//Muestro las diferencias divididas
+    	System.out.println("\nMuestra de las diferencias divididas:");
+    	for(int i=0; i<n ;i++) {
+    		System.out.print(d[i]+"\t");
+    	}
+    	
     	return dAux;
     }
     //COLOCACION POR NEWTON
