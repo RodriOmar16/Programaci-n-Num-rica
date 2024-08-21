@@ -230,6 +230,7 @@ public class PolinomioAprox {
     		for(int j=0; j<n ;j++) {
     			System.out.print(pbAux[i][j]+"\t");
     		}
+    		System.out.print(" | "+this.ListaPtos[i][1]);
     	}
     	
     	//Formo el matriz yM para el producto Matricial
@@ -263,6 +264,15 @@ public class PolinomioAprox {
     			pbAux[i][j] *= this.ListaPtos[i][1]; 
     		}
     	}
+    	
+    	System.out.println("\nLi(x)*f(xi):");
+    	for(int i=0; i<n ;i++) {
+    		System.out.println("");
+    		for(int j=0; j<n ;j++) {
+    			System.out.print(pbAux[i][j]+"\t");
+    		}
+    	}
+    	
     	//Sumo los coeficientes para obtener el polinomio final
     	for(int j=0; j<n ;j++) {
     		for(int i=0; i<n ;i++) {

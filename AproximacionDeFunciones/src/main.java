@@ -12,16 +12,16 @@ public class main {
 		System.out.println("Mostrar Polinomio interpolante por Van Der Monde:");
 		p.mostrarPolinomioInterpolante();*/
 		
-		/*p.lagrange(1);
+		p.lagrange(1);
 		System.out.println("\nMostrar Polinomio interpolante por Lagrange:");
-		p.mostrarPolinomioInterpolante();*/
+		p.mostrarPolinomioInterpolante();
 		/*p.lagrange(2);
 		System.out.println("\nMostrar Polinomio interpolante por Lagrange:");
 		p.mostrarPolinomioInterpolante();*/
 		
-		p.newton();
+		/*p.newton();
 		System.out.println("\nMostrar Polinomio interpolante por Newton:");
-		p.mostrarPolinomioInterpolante();
+		p.mostrarPolinomioInterpolante();*/
 
 	}
 
