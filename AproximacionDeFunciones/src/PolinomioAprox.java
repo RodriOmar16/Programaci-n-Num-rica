@@ -311,15 +311,22 @@ public class PolinomioAprox {
     	}
     }
 
+    private double factorial(int x){
+    	double acu = 1;
+    	for(int i=2; i<=x ;i++){
+    		acu *= i;
+    	}
+    	return acu;
+    }
     private double[] diferenciasDivididas() {
-    	int n = this.cantidad;
+    	int n = this.cantidad, k=0, m = this.columnas;
     	double d[] = new double[n], dAux[] = new double[n];
     	
     	//Copio las coordenadas de y = f(x)
     	for(int i=0; i<n ;i++) {
     		dAux[i] = this.ListaPtos[i][1];
     	}
-    	
+    	k=m-2;
     	//Calculo las diferencias divididas
     	for(int i=0; i<n ;i++) {
     		//Muestro en cada paso como obtiene
@@ -335,6 +342,13 @@ public class PolinomioAprox {
     		for(int j=i; j<(n-1) ;j++) {
     			dAux[j+1] = (d[j+1] - d[j])/(this.ListaPtos[j+1][0] - this.ListaPtos[j-i][0]);
     		}
+    		//armo el array de diferencias divididas
+    		for(int j=i; j<(n-1) ;j++) {
+    			if(this.ListaPtos[j+1][0] == this.ListaPtos[j-i][0]) {
+    				dAux[j+1] = (this.ListaPtos[j][k])/(factorial(i+1));
+    			}else	dAux[j+1] = (d[j+1] - d[j])/(this.ListaPtos[j+1][0] - this.ListaPtos[j-i][0]);
+    		}
+    		k++;
     	}
     	//Muestro las diferencias divididas
     	System.out.println("\nMuestra de las diferencias divididas:");
@@ -417,9 +431,12 @@ public class PolinomioAprox {
     //OSCULACION POR NEWTON
     public void newtonOsculacion(){//dice hasta que orden de derivacion llega
     	int m = this.columnas, n = this.cantidad;
-    	double l[][] = new double[n][m];
+    	double l[][] = new double[n][m], d[] = new double[n];
     	
     	setListaPtos(transformaTabla(),n*(m-1),m);
+    	/*System.out.println("\n");
+    	mostrarPtos();*/
+    	d = diferenciasDivididas();
     	
     }
 }

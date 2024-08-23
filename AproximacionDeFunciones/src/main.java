@@ -2,7 +2,7 @@
 public class main {
 
 	public static void main(String[] args) {
-		PolinomioAprox p = new PolinomioAprox(3,4);
+		PolinomioAprox p = new PolinomioAprox(3,2);
 		
 		p.cargarPtos();
 		System.out.println("\nMuestra de los ptos:");
@@ -19,11 +19,11 @@ public class main {
 		System.out.println("\nMostrar Polinomio interpolante por Lagrange:");
 		p.mostrarPolinomioInterpolante();*/
 		
-		/*p.newton();
+		p.newton();
 		System.out.println("\nMostrar Polinomio interpolante por Newton:");
-		p.mostrarPolinomioInterpolante();*/
+		p.mostrarPolinomioInterpolante();
 		
-		p.newtonOsculacion();
+		//p.newtonOsculacion();
 		//System.out.println("\nMostrar Polinomio interpolante por Newton OSCULACION:");
 		//p.mostrarPolinomioInterpolante();
 	}
