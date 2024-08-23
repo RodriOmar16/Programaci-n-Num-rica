@@ -358,14 +358,22 @@ public class PolinomioAprox {
     	
     	return dAux;
     }
-    //COLOCACION POR NEWTON
-    public void newton() {
+    //NEWTON GENERALIZADO (OSCULACION & COLOCACION)
+    public void newton(boolean osculacion) {
     	int tam = this.cantidad, k=0;
     	double d[] = new double[tam],
     		aux[]  = new double[tam-1],
     		aux2[],
     		m[][]  = new double[tam][tam]/*,
     		acu*/;
+    	
+    	if(osculacion) {
+    		setListaPtos(transformaTabla(),tam*(this.columnas-1), this.columnas);
+    		tam  = this.cantidad;
+    		aux  = new double[tam-1];
+    		m    = new double[tam][tam];
+    		this.PolinomioInterpolante = new double[tam];
+    	}    	
     	
     	d = diferenciasDivididas();
     	
@@ -419,24 +427,6 @@ public class PolinomioAprox {
 			}
     		ind++;
     	}
-    	/*System.out.println("\nMuestra de la lista de puntos OSCULACION: ");
-    	for(i=0; i<n ;i++) {
-    		System.out.println("");
-    		for(int j=0; j<m ;j++) {
-    			System.out.print(l[i][j]+"\t");
-    		}
-    	}*/
     	return l;
-    }
-    //OSCULACION POR NEWTON
-    public void newtonOsculacion(){//dice hasta que orden de derivacion llega
-    	int m = this.columnas, n = this.cantidad;
-    	double l[][] = new double[n][m], d[] = new double[n];
-    	
-    	setListaPtos(transformaTabla(),n*(m-1),m);
-    	/*System.out.println("\n");
-    	mostrarPtos();*/
-    	d = diferenciasDivididas();
-    	
     }
 }

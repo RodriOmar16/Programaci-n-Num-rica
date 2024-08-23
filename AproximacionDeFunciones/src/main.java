@@ -19,7 +19,7 @@ public class main {
 		System.out.println("\nMostrar Polinomio interpolante por Lagrange:");
 		p.mostrarPolinomioInterpolante();*/
 		
-		p.newton();
+		p.newton(false);
 		System.out.println("\nMostrar Polinomio interpolante por Newton:");
 		p.mostrarPolinomioInterpolante();
 		
