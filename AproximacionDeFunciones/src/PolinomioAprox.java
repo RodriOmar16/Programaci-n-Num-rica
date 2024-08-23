@@ -8,12 +8,14 @@ public class PolinomioAprox {
 	public double ListaPtos[][]; //termninos independientes
 	public double PolinomioInterpolante[]; 
 	public int cantidad;
+	public int columnas;
 	
 	//Constructor
-	public PolinomioAprox(int n) {
+	public PolinomioAprox(int n, int m) {
 		this.cantidad              = n;
+		this.columnas			   = m;
 		this.MatrizInterpolante    = new Matriz(n,n);
-		this.ListaPtos             = new double[n][2];
+		this.ListaPtos             = new double[n][m];
 		this.PolinomioInterpolante = new double[n];
 	}
 	//GETTERS AND SETTERS
@@ -23,6 +25,7 @@ public class PolinomioAprox {
 	public double[][] getListaPtos() { return this.ListaPtos; }
 	public void setListaPtos(double l[][], int n, int m) {
 		this.cantidad = n;
+		this.columnas = m;
 		this.ListaPtos = new double[n][m];
 
 		for(int i=0; i<n ;i++) {
@@ -45,23 +48,37 @@ public class PolinomioAprox {
 	//--------------------------------------------METODOS---------------------------------------------------------
 	public void cargarPtos(){
 		int n = this.cantidad;
+		int m = this.columnas;
 		Scanner teclado = new Scanner(System.in);
+
 		for(int i=0; i<n ;i++) {
-			for(int j=0; j<2 ;j++) {
-				if(j==0) {
-					System.out.print("Ingresar coordenada x: ");
-				}else System.out.print("Ingresar valor y = f(x): ");
+			for(int j=0; j<m ;j++) {
+				switch(j) {
+					case 0: System.out.print("Ingresar coordenada x: "); break;
+					case 1: System.out.print("Ingresar valor y = f(x): "); break;
+					default: System.out.print("Ingresar valor la derivada de orden "+(j-1)+": "); break;
+				}
 				this.ListaPtos[i][j] = teclado.nextDouble();
 			}
 		}
 	}
 	public void mostrarPtos() {
 		int n = this.cantidad;
-		System.out.print("x | y = f(x)");
+		int m = this.columnas, j;
+		
+		for(j=0; j<m ;j++){
+			switch(j) {
+				case 0: System.out.print("x | "); break;
+				case 1: System.out.print("f(x) | "); break;
+				default: System.out.print("f"+(j-1)+"(x) | "); break;
+			}			
+		}
+		if(m>2)System.out.print("f"+(j-1)+"(x)");
+		
 		for(int i=0; i<n ;i++) {
 			System.out.print("\n----------------\n");	
-			for(int j=0; j<2 ;j++) {
-				if(j==0) {
+			for(j=0; j<m ;j++) {
+				if(j<=(m-1)) {
 					System.out.print(this.ListaPtos[i][j]+" | ");
 				}else System.out.print(this.ListaPtos[i][j]);
 			}
@@ -373,5 +390,36 @@ public class PolinomioAprox {
         		this.PolinomioInterpolante[j] += m[i][j];
         	}
         }
+    }
+    
+    public double[][] transformaTabla(){
+    	int m = this.columnas, n = (this.cantidad * (m-1)), i, ind=0;
+    	double l[][] = new double[n][m];
+    	i=0;
+    	while( ind<this.cantidad ) {
+			for(int k=0; k<=(m-2) ;k++) {
+	    		for(int j=0; j<m ;j++) {
+	    			l[i][j] = this.ListaPtos[ind][j];
+	    		}
+	    		i++;
+			}
+    		ind++;
+    	}
+    	/*System.out.println("\nMuestra de la lista de puntos OSCULACION: ");
+    	for(i=0; i<n ;i++) {
+    		System.out.println("");
+    		for(int j=0; j<m ;j++) {
+    			System.out.print(l[i][j]+"\t");
+    		}
+    	}*/
+    	return l;
+    }
+    //OSCULACION POR NEWTON
+    public void newtonOsculacion(){//dice hasta que orden de derivacion llega
+    	int m = this.columnas, n = this.cantidad;
+    	double l[][] = new double[n][m];
+    	
+    	setListaPtos(transformaTabla(),n*(m-1),m);
+    	
     }
 }
