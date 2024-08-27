@@ -55,8 +55,8 @@ public class funcionEmpirica {
 		for(int i=0; i<n ;i++) {
 			for(int j=0; j<2 ;j++) {
 				if(j==0) {
-					System.out.print("Ingresar coordenada de x :");
-				}else System.out.print("Ingresar coordenada de y = f(x) :");
+					System.out.print("Ingresar coordenada de x: ");
+				}else System.out.print("Ingresar coordenada de y = f(x): ");
 				this.listPtos[i][j] = teclado.nextDouble();
 			}
 		}
@@ -88,7 +88,7 @@ public class funcionEmpirica {
 		System.out.println("\nMuestra de la lista de ptos.:");
 		System.out.println(" x | f(x) ");
 		for(int i=0; i<n ;i++) {
-			System.out.println("");
+			//System.out.println("");
 			for(int j=0; j<2 ;j++) {
 				if(j == 0) {
 					System.out.print(this.listPtos[i][j]+" | ");
@@ -129,18 +129,37 @@ public class funcionEmpirica {
 				}
 			}
 		}
+		System.out.println("\nMuestra de la lista de ptos.:");
+		System.out.println(" x | f(x) ");
+		for(int i=0; i<n ;i++) {
+			//System.out.println("");
+			for(int j=0; j<2 ;j++) {
+				if(j == 0) {
+					System.out.print(this.listaLinealizada[i][j]+" | ");
+				}else System.out.println(this.listaLinealizada[i][j]);
+			}
+		}
 	}
 	//PUNTOS SELECCIONADOS
 	public void puntosSeleccionados(int ind1, int ind2) {
-		double m[][] = new double[2][2],
-				resultado[] = new double[2];
+		double m[][] = new double[2][3];
 		
 		//ARMO EL SISTEMA
-		m[0][0] = this.listaLinealizada[ind1][0];
-		m[0][1] = this.listaLinealizada[ind1][1];
-		m[1][0] = this.listaLinealizada[ind2][0];
-		m[1][1] = this.listaLinealizada[ind2][1];
+		m[0][0] = this.listaLinealizada[ind1][0];		m[0][1] = 1;		m[0][2] = this.listaLinealizada[ind1][1];
+		m[1][0] = this.listaLinealizada[ind2][0];		m[1][1] = 1;		m[1][2] = this.listaLinealizada[ind2][1];
 		
+		System.out.println("\nMuestra del sistema: ");
+		for(int i=0; i<2 ;i++) {
+			System.out.println("");
+			for(int j=0; j<3 ;j++) {
+				if(j!=1){
+					System.out.print(m[i][j]+"\t");
+				}else System.out.print(m[i][j]+" | ");
+			}
+		}
 		
+		b = (m[0][0] * m[1][2] - m[1][0] * m[0][2])/(m[0][0] - m[1][0]);
+		
+		a = (m[0][2]-b)/m[0][0];
 	}
 }
