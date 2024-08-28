@@ -8,9 +8,10 @@ public class main {
 			f.mostrarListaPtos();
 			f.linealizacion("Exponencial");
 			System.out.println("\nLuego de linealizar:");
-			f.puntosSeleccionados(0,4);
-			System.out.println("Parámetros a: "+f.getA());
-			System.out.println("Parámetros b: "+f.getB());
+			//f.puntosSeleccionados(0,4);
+			f.desvios();
+			System.out.println("\nParámetros a: "+f.getA());
+			System.out.println("\nParámetros b: "+f.getB());
 		}else System.out.println("fallo");
 	}
 

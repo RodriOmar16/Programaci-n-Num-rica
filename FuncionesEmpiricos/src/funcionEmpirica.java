@@ -129,7 +129,7 @@ public class funcionEmpirica {
 				}
 			}
 		}
-		System.out.println("\nMuestra de la lista de ptos.:");
+		System.out.println("\nMuestra de la lista de ptos. linealizada:");
 		System.out.println(" x | f(x) ");
 		for(int i=0; i<n ;i++) {
 			//System.out.println("");
@@ -161,5 +161,39 @@ public class funcionEmpirica {
 		b = (m[0][0] * m[1][2] - m[1][0] * m[0][2])/(m[0][0] - m[1][0]);
 		
 		a = (m[0][2]-b)/m[0][0];
+	}
+	//DESVIOS
+	public void desvios() {
+		int n = this.cant, r= n%2==0 ? (n/2) : (n/2+1);
+		double m[][] = new double[2][3], acu, acu1;
+		
+		System.out.println("n: "+n+"\tr: "+r);
+		
+		acu=0; acu1=0;
+		for(int i=0; i<r ;i++) {
+			acu += this.listaLinealizada[i][0];			acu1 += this.listaLinealizada[i][1];
+		}
+		m[0][0] = acu; 		m[0][1] = r;	m[0][2] = acu1;
+				
+		//-------------------------------------------
+		acu=0; acu1=0;
+		for(int i=r; i<n ;i++) {
+			acu += this.listaLinealizada[i][0];		acu1 += this.listaLinealizada[i][1];
+		}
+		m[1][0] = acu; 		m[1][1] = n-r;		m[1][2] = acu1;
+		
+		System.out.println("\nMuestra del sistema: ");
+		for(int i=0; i<2 ;i++) {
+			System.out.println("");
+			for(int j=0; j<3 ;j++) {
+				if(j!=1){
+					System.out.print(m[i][j]+"\t");
+				}else System.out.print(m[i][j]+" | ");
+			}
+		}
+		
+		b = (m[0][0] * m[1][2] - m[1][0] * m[0][2])/(m[0][0]*(n-r) - r*m[1][0]);
+		a = (m[0][2]-(r*b))/m[0][0];
+		
 	}
 }
