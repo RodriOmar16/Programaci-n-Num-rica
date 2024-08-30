@@ -94,7 +94,7 @@
                   outlined
                   dense
                   clearable
-                  @change="getLocalesPadresHijos()"
+                  @change="esPadre && !nuevo? getLocalesInicial() :getLocalesPadresHijos()"
                 ></v-autocomplete>
               </v-col>
               <v-col cols="12" sm="6" md="5" class="py-1">
@@ -327,34 +327,43 @@ export default {
     },
     async getLocalesInicial(){
       let obj = {
-        empresa_codigo:   this.localCopia.empresa_codigo,
-        sucursal_codigo:  this.localCopia.sucursal_codigo ? this.localCopia.sucursal_codigo : 0,
-        local_codigo:     this.localCopia.localOrigen.local_codigo_origen,
-        tipo_facturacion: this.localCopia.tipoFacturacion
+        empresa_codigo:       this.localCopia.empresa_codigo,
+        sucursal_codigo:      this.localCopia.sucursal_codigo,
+        local_codigo_origen:  this.localCopia.local_codigo_origen,
+        tipo_facturacion_id:  this.localCopia.tipo_facturacion_codigo,
+        pv_afip:              this.localCopia.pv_afip
       };
 
       this.load1 = true;
       this.$store.state.loading = true;
-      const res = await this.$store.dispatch('localesStore/getLocalesPtoVtaEditar', obj)
+      const res = await this.$store.dispatch('localesStore/getLocalesHijosHuerfanos', obj)
       this.$store.state.loading = false;
       this.load1 = false;
 
       if (res.resultado == 0){
         return this.$store.dispatch('show_snackbar', { text: res.message, color: 'error'})
       }
-      this.locales = res.locales;
-      order_list_by(this.locales, 'local_acc_nombre')
-
-      if(this.localCopia.localOrigen.local_codigo_origen && this.localCopia.sucursal_codigo){
-        if(this.localCopia.local && Object.keys(this.localCopia.local)!=0){ //si es hijo
-          //guardo el hijo
-          this.localLocal = this.locales.filter(e => e.local_acc_codigo == this.localCopia.local.local_codigo)[0]
+      this.localesHijos = res.locales;
+      order_list_by(this.localesHijos, 'local_acc_nombre')
+      /*
+      {
+          empresa_codigo: 0,
+          empresa_nombre: '',
+          sucursal_codigo: 0,
+          sucursal_nombre: '',
+          fecha_habilitacion: moment(new Date()).format('DD/MM/YYYY'),
+          inhabilitado: 0,
+          local_codigo: 0,
+          local_nombre: '',
+          local_codigo_origen: 0,
+          local_nombre_origen: '',
+          pv_afip: '',
+          tipo_facturacion_codigo: 0,
+          tipo_facturacion_nombre: '',
+          localesAsociados: []
         }
-        this.localesAsociados.forEach(e => {
-          let aux = this.locales.filter(elem => elem.local_acc_codigo == e.local_codigo);
-          this.localesAsoc.push(aux[0]);
-        });
-      }
+      */
+      this.localCopia.localesAsociados = this.localesHijos.filter(e => e.local_codigo_origen == this.localCopia.local_codigo_origen);
     },
     //nuevos
     async getLocalesPadresHijos(){

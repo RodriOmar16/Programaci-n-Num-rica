@@ -4,7 +4,8 @@ cuando inicia el modal:
 EDITAR
 -	Si es hijo:
 	Bloquear la sucursal
-	Le muestro los padres que pueden ser seleccionados(los que están en LOCALES_PV y local_codigo_origen = local_codigo para esa empresa, sucursal, tipo fact,)
+	Le muestro los padres que pueden ser seleccionados(los que están en LOCALES_PV y local_codigo_origen = local_codigo para esa empresa, sucursal, tipo fact,
+huerfanos o  bien que están inhabilitados y con padres)
 	Si solos cambias de tipo de Fact o la fecha de hab, se actualiza en base para ese local_origen, local_hijo, pto_vta_afip, tipo_fact_viejo, fecha_hab_vieja y
  inhabilitado(como el campo localCopia.inhabilitado). getLocalesPadres()
 	
@@ -15,12 +16,15 @@ EDITAR
 -	Si es padre:
 	Bloqueo la sucursal y Local Origen
 	Le traigo todos los hijos de ese local_codigo_origen por empresa_id, sucursal_codigo, pto_vta_afip, tipo_fact y además le muestro
-	todos los huerfanos(locales sin padres, locales inhabilitados con padres) disponibles.(getLocalesHijos)
+	todos los huerfanos(locales sin padres, locales inhabilitados con padres) disponibles.(getLocalesHijosHuerfanos)
 	Si no se cambia la sucursal y si se cambia el tipo de facturacion reseteo los asociados y traigo los hijos disponibles para esos filtros.(getLocalesHijos)
 	//Si se cambia de sucursal se resetean los asociados, se formatea el local origen y se traen los padres disponibles para esos filtros. (getLocales)
 
 NUEVO
--	Para BUSCAR requiero empresa_codigo, sucursal_codigo y traigo todos los LOCALES habilitados.(getLocalesPtoVta)
+-	Para BUSCAR requiero empresa_codigo, sucursal_codigo y traigo todos los LOCALES habilitados.(getLocalesPtoVta). 
+	API: Los que no están en LOCALES_PV, 
+	     Al momento de grabar controlar que para es local_codigo, local_codigo_origen, tipo_fact, pv_afip, empresa_id, sucursar_codigo 
+no exista ya uno HABILITADO.
 	Esos dejo seleccionar como locales origen mientras dejo los asociados están vacios.
 	Para los locales asociados requiero local_codigo_origen, empresa_id, sucursal_codigo, pto_vta_afip, tipo_fact así
  muestro y dejo seleccionar los locales huerfanos(locales sin padres, locales inhabilitados con padres) disponibles. (getLocalesHuerfanos)
