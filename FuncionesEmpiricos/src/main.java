@@ -9,7 +9,8 @@ public class main {
 			f.linealizacion("Exponencial");
 			System.out.println("\nLuego de linealizar:");
 			//f.puntosSeleccionados(0,4);
-			f.desvios();
+			//f.desvios();
+			f.minimosCuadrados();
 			System.out.println("\nParámetros a: "+f.getA());
 			System.out.println("\nParámetros b: "+f.getB());
 		}else System.out.println("fallo");

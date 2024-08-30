@@ -196,4 +196,36 @@ public class funcionEmpirica {
 		a = (m[0][2]-(r*b))/m[0][0];
 		
 	}
+	//MINIMOS CUADRADOS
+	public void minimosCuadrados() {
+		int n = this.cant;
+		double m[][] = new double[2][3], acu, acu1, acu2;
+		
+		acu = 0; acu1=0; acu2=0;
+		for(int i=0; i<n ;i++) {
+			acu  += Math.pow(this.listaLinealizada[i][0], 2);
+			acu1 += this.listaLinealizada[i][0];
+			acu2 += (this.listaLinealizada[i][0] * this.listaLinealizada[i][1]);
+		}
+		m[0][0] = acu;		m[0][1] = acu1;		m[0][2] = acu2;
+		//-----------------------------------------------------------------------
+		acu2=0;
+		for(int i=0; i<n ;i++) {
+			acu2 += (this.listaLinealizada[i][1]);
+		}
+		m[1][0] = acu1;		m[1][1] = n+1;		m[1][2] = acu2;
+		
+		System.out.println("\nMuestra del sistema: ");
+		for(int i=0; i<2 ;i++) {
+			System.out.println("");
+			for(int j=0; j<3 ;j++) {
+				if(j!=1){
+					System.out.print(m[i][j]+"\t");
+				}else System.out.print(m[i][j]+" | ");
+			}
+		}
+		
+		b = (m[0][0] * m[1][2] - m[1][0] * m[0][2])/(m[0][0]*m[1][1] - m[1][0]*m[0][1]);
+		a = (m[0][2]-(m[0][1]*b))/m[0][0];
+	}
 }

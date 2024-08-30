@@ -1,0 +1,5 @@
+-Puede un local tener más de un padre? 
+-puede un local padre ser hijo de otro?
+-controlar que al momento de editar un hijo, el hijo puede cambiar de padre! y manteniendo fijo el padre ¿puedo cambiar de hijo ?
+- editando a un hijo. abro el modal y tengo un padre, si lo cambio se deja inhabilitada para ese padre y se inserta una nueva row 
+con el nuevo padre o actualizo la columna local_origen_codigo?

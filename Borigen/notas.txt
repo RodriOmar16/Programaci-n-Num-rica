@@ -1,0 +1,28 @@
+
+--
+cuando inicia el modal:
+EDITAR
+-	Si es hijo:
+	Bloquear la sucursal
+	Le muestro los padres que pueden ser seleccionados(los que están en LOCALES_PV y local_codigo_origen = local_codigo para esa empresa, sucursal, tipo fact,)
+	Si solos cambias de tipo de Fact o la fecha de hab, se actualiza en base para ese local_origen, local_hijo, pto_vta_afip, tipo_fact_viejo, fecha_hab_vieja y
+ inhabilitado(como el campo localCopia.inhabilitado). getLocalesPadres()
+	
+	 API: En este caso si se cambia de padre lo que se hace es a esa tupla del padre viejo en la base darla de inhabilitada e 
+	insertar una nueva tupla con el nuevo padre, siempre y cuando el padre nuevo no sea un hijo de otro(no hay abuelos) y ese nuevo padre no lo tenga ya como hijo.
+	en preguntas???
+
+-	Si es padre:
+	Bloqueo la sucursal y Local Origen
+	Le traigo todos los hijos de ese local_codigo_origen por empresa_id, sucursal_codigo, pto_vta_afip, tipo_fact y además le muestro
+	todos los huerfanos(locales sin padres, locales inhabilitados con padres) disponibles.(getLocalesHijos)
+	Si no se cambia la sucursal y si se cambia el tipo de facturacion reseteo los asociados y traigo los hijos disponibles para esos filtros.(getLocalesHijos)
+	//Si se cambia de sucursal se resetean los asociados, se formatea el local origen y se traen los padres disponibles para esos filtros. (getLocales)
+
+NUEVO
+-	Para BUSCAR requiero empresa_codigo, sucursal_codigo y traigo todos los LOCALES habilitados.(getLocalesPtoVta)
+	Esos dejo seleccionar como locales origen mientras dejo los asociados están vacios.
+	Para los locales asociados requiero local_codigo_origen, empresa_id, sucursal_codigo, pto_vta_afip, tipo_fact así
+ muestro y dejo seleccionar los locales huerfanos(locales sin padres, locales inhabilitados con padres) disponibles. (getLocalesHuerfanos)
+	Si selecciono locales asociados y cambio de empresa o de sucursal reseteo el local_codigo_origen y los localesAsociados, y traigo 
+	todos los LOCALES habilitados (getLocalesPtoVta)
