@@ -400,7 +400,7 @@ export default {
       });
       if (!modal.isConfirmed) return
       //detAsociados
-      this.asociarLocales(item);
+      this.detAsociados(item);
 
       this.$store.state.loading = true;
       const res = await this.$store.dispatch('localesStore/inhabilitarLocalesAfip',{

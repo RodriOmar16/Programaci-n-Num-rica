@@ -94,7 +94,7 @@
                   outlined
                   dense
                   clearable
-                  @change="esPadre && !nuevo? getLocalesInicial() :getLocalesPadresHijos()"
+                  @change="!nuevo ? (esPadre? getLocalesHijos() : getLocalesPadres() ) : getLocalesPadresHijos()"
                 ></v-autocomplete>
               </v-col>
               <v-col cols="12" sm="6" md="5" class="py-1">
@@ -325,7 +325,8 @@ export default {
 
       return error;
     },
-    async getLocalesInicial(){
+    //Editar: Inicial Padre
+    async getLocalesHijos(){
       let obj = {
         empresa_codigo:       this.localCopia.empresa_codigo,
         sucursal_codigo:      this.localCopia.sucursal_codigo,
@@ -365,7 +366,33 @@ export default {
       */
       this.localCopia.localesAsociados = this.localesHijos.filter(e => e.local_codigo_origen == this.localCopia.local_codigo_origen);
     },
-    //nuevos
+    //Editar: Inicial Hijos
+    async getLocalesPadres(){
+      let obj = {};
+      if(this.localCopia.empresa_codigo && this.localCopia.sucursal_codigo &&
+         this.localCopia.local_codigo_origen && this.localCopia.pv_afip && 
+         this.localCopia.tipo_facturacion_codigo
+      ){
+        obj.empresa_codigo  = this.localCopia.empresa_codigo,
+        obj.sucursal_codigo = this.localCopia.sucursal_codigo
+        obj.local_codigo_origen = this.localCopia.local_codigo_origen,
+        obj.pv_afip             = this.localCopia.pv_afip,
+        obj.tipo_facturacion_id = this.localCopia.tipo_facturacion_codigo
+        
+        this.load1 = true;
+        this.$store.state.loading = true;
+        const res = await this.$store.dispatch(`localesStore/getLocalesPadres`,  obj);
+        this.$store.state.loading = false;
+        this.load1 = false;
+
+        if (res.resultado == 0){
+          return this.$store.dispatch('show_snackbar', { text: res.message, color: 'error'})
+        }
+        this.localesPadres = res.locales;
+        order_list_by(this.localesPadres, 'local_nombre')
+      }
+    },
+    //Nuevos
     async getLocalesPadresHijos(){
       this.localesHijos   = [];  //los disponibles a seleccionar
       this.localCopia.localesAsociados    = [] //hijos que se fueron agregando, los seleccionados
@@ -518,10 +545,10 @@ export default {
           this.esPadre = this.localCopia.local_codigo == this.localCopia.local_codigo_origen;
           if(this.localCopia.localesAsociados.length != 0 || this.esPadre ){
             //es un padre
-            await this.getLocalesInicial();
+            await this.getLocalesHijos();
           }else{
             //es un hijo
-            await this.getLocalesPadresHnos();
+            await this.getLocalesPadres();
           }
         }
       }else{
