@@ -279,7 +279,7 @@ export default {
           tipo_facturacion_nombre: '',
           localesAsociados: []
         },
-        tiposFacturacion: [];
+        tiposFacturacion: []
 		  }
     }
   },

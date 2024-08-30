@@ -33,7 +33,7 @@
                   :filled="!nuevo"
                   :readonly="!nuevo"
                   :clearable="nuevo"
-                  @change="getLocalesPtoVta()"
+                  @change="getLocalesPadresHijos()"
                 ></v-autocomplete>
               </v-col>
               <v-col cols="12" sm="6" md="4" class="py-1">
@@ -50,7 +50,7 @@
                   :filled="!nuevo"
                   :readonly="!nuevo"
                   :clearable="nuevo"
-                  @change="getLocalesPtoVta()"
+                  @change="getLocalesPadresHijos()"
                 ></v-autocomplete>
               </v-col>
               <v-col cols="12" sm="6" md="4" class="py-1">
@@ -79,7 +79,7 @@
                     outputMask: '####',
                     empty: null
                   }"
-                  @change="getLocalesHuerfanos()"
+                  @change="getLocalesPadresHijos()"
                 />
               </v-col>
               <v-col cols="12" sm="6" md="5" class="py-1">
@@ -94,7 +94,7 @@
                   outlined
                   dense
                   clearable
-                  @change="getLocalesHuerfanos()"
+                  @change="getLocalesPadresHijos()"
                 ></v-autocomplete>
               </v-col>
               <v-col cols="12" sm="6" md="5" class="py-1">
@@ -137,7 +137,7 @@
                   :filled="!nuevo && esPadre"
                   :readonly="!nuevo && esPadre"
                   :clearable="nuevo"
-                  @change="getLocalesHuerfanos()"
+                  @change="getLocalesPadresHijos()"
                 ></v-autocomplete>
               <!-- :filled="!nuevo && localCopia.local_codigo == localCopia.local_codigo_origen"
                   :readonly="!nuevo && localCopia.local_codigo == localCopia.local_codigo_origen" -->
@@ -356,8 +356,53 @@ export default {
         });
       }
     },
+    //nuevos
+    async getLocalesPadresHijos(){
+      this.localesHijos   = [];  //los disponibles a seleccionar
+      this.localCopia.localesAsociados    = [] //hijos que se fueron agregando, los seleccionados
+      let obj = {
+        empresa_codigo:       null,
+        sucursal_codigo:      null,
+        local_codigo_origen:  null,
+        pv_afip:              null,
+        tipo_facturacion_id:  null
+      };
+      if(this.localCopia.empresa_codigo && this.localCopia.sucursal_codigo){
+        obj.empresa_codigo  = this.localCopia.empresa_codigo,
+        obj.sucursal_codigo = this.localCopia.sucursal_codigo
+        
+        if(
+          this.localCopia.local_codigo_origen && this.localCopia.pv_afip && 
+          this.localCopia.tipo_facturacion_codigo
+        ){
+          obj.local_codigo_origen = this.localCopia.local_codigo_origen,
+          obj.pv_afip             = this.localCopia.pv_afip,
+          obj.tipo_facturacion_id = this.localCopia.tipo_facturacion_codigo
+        }else{
+          this.localesPadres  = []; //resultado de la consulta
+          this.localCopia.local_codigo_origen = null; //padre
+        }
+
+        this.load1 = true;
+        this.$store.state.loading = true;
+        const res = await this.$store.dispatch(`localesStore/getLocalesPadresHijos`,  obj);
+        this.$store.state.loading = false;
+        this.load1 = false;
+
+        if (res.resultado == 0){
+          return this.$store.dispatch('show_snackbar', { text: res.message, color: 'error'})
+        }
+        if(obj.local_codigo_origen && obj.pv_afip && obj.tipo_facturacion_id){
+          this.localesHijos = res.locales;
+          order_list_by(this.localesHijos, 'local_nombre')
+        }else{
+          this.localesPadres = res.locales;
+          order_list_by(this.localesPadres, 'local_nombre')
+        }
+      }
+    },
     //Nuevos
-    async getLocalesPtoVta(){
+    /*async getLocalesPtoVta(){
       this.localesPadres  = []; //resultado de la consulta
       this.localesHijos   = [];  //los disponibles a seleccionar
       this.localCopia.local_codigo_origen = null; //padre
@@ -404,32 +449,7 @@ export default {
         this.localesHijos = res.locales;
         order_list_by(this.locales, 'local_nombre')
       }
-    },
-    async getLocalesPadresHnos(){
-
-    },
-    async getLocalesPadresHijos(){
-      if(this.localCopia.empresa_codigo && this.localCopia.sucursal_codigo){
-        this.load1 = true;
-        this.$store.state.loading = true;
-        const res = await this.$store.dispatch('localesStore/getLocalesPadresHijos', {
-          empresa_codigo:   this.localCopia.empresa_codigo,
-          sucursal_codigo:  this.localCopia.sucursal_codigo ? this.localCopia.sucursal_codigo : 0,
-          local_codigo_origen: this.localCopia.localOrigen ? this.localCopia.localOrigen : null
-        });
-        this.$store.state.loading = false;
-        this.load1 = false;
-
-        if (res.resultado == 0){
-          return this.$store.dispatch('show_snackbar', { text: res.message, color: 'error'})
-        }
-        console.log("res: ", res);
-
-        this.localesPadres = res.locales.padres;
-        this.localesHijos = res.locales.hijos ? res.locales.hijos : [];
-        //order_list_by(this.locales, 'local_acc_nombre')
-      }
-    },
+    },*/
     limpiar(){
       this.local.empresa_codigo    = null;
       this.local.sucursal_codigo   = null;
