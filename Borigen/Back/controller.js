@@ -690,22 +690,27 @@ export default {
     try {
       let parametros = req.query;
       if(
-        Object.keys(parametros).length == 5 &&
+        Object.keys(parametros).length == 6 &&
         parametros.hasOwnProperty('empresa_codigo') && esNumeroEntero(parametros.empresa_codigo) && parseInt(parametros.empresa_codigo) >0 &&
         parametros.hasOwnProperty('sucursal_codigo') && esNumeroEntero(parametros.sucursal_codigo) && parseInt(parametros.sucursal_codigo) >0 &&
-        parametros.hasOwnProperty('local_codigo_origen') && parametros.hasOwnProperty('pv_afip') && parametros.hasOwnProperty('tipo_facturacion_id')
+        parametros.hasOwnProperty('local_codigo_origen') && parametros.hasOwnProperty('pv_afip') && parametros.hasOwnProperty('tipo_facturacion_id') &&
+        parametros.hasOwnProperty('esPadre')
       ){
         console.log("parametros: ", parametros);
         let peticion;
 
-        if(campoNoVacio(parametros.local_codigo_origen) && campoNoVacio(parametros.tipo_facturacion_id)){
+        if(!parametros.esPadre){
+          /*campoNoVacio(parametros.local_codigo_origen) && campoNoVacio(parametros.tipo_facturacion_id)
           if(campoNoVacio(parametros.pv_afip)){
             peticion = await localesGestion.getLocalesHijosEditarOracle(parametros);
           }else{
             peticion = await localesGestion.getLocalesHijosOracle(parametros);
-          }
+          }*/
+          peticion = await localesGestion.getLocalesHijosEditarOracle(parametros);
 
-        } else { peticion = await localesGestion.getLocalesPadresOracle(parametros); }
+        } else { 
+          peticion = await localesGestion.getLocalesPadresOracle(parametros);
+        }
 
         if(peticion.resultado == 0){
           return res.status(500).send({

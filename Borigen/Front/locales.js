@@ -451,7 +451,7 @@ export default {
     async getLocalesPadresHijos({}, datos){
       return await new Promise(async (resolve, reject) => {
         try{
-          let localesPeticion = await fetch(`${config.BASE_URL}/locales/getLocalesPadresHijos?empresa_codigo=${datos.empresa_codigo}&sucursal_codigo=${datos.sucursal_codigo}&local_codigo_origen=${datos.local_codigo_origen}&pv_afip=${datos.pv_afip}&tipo_facturacion_id=${datos.tipo_facturacion_id}`, {
+          let localesPeticion = await fetch(`${config.BASE_URL}/locales/getLocalesPadresHijos?empresa_codigo=${datos.empresa_codigo}&sucursal_codigo=${datos.sucursal_codigo}&local_codigo_origen=${datos.local_codigo_origen}&pv_afip=${datos.pv_afip}&tipo_facturacion_id=${datos.tipo_facturacion_id},&esPadre=${datos.esPadre}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -468,13 +468,13 @@ export default {
         }
       })
     },
+    async getLocalesPadres({}, datos){
+
+    },
     async getLocalesHijosHuerfanos({}, datos){
       return await new Promise(async (resolve, reject) => {
         try{
-          let localesPeticion = await fetch(`${config.BASE_URL}/locales/getLocalesHijosHuerfanos?
-            empresa_codigo=${datos.empresa_codigo}&sucursal_codigo=${datos.sucursal_codigo}&
-            local_codigo_origen=${datos.local_codigo_origen}&pv_afip=${datos.pv_afip}&
-            tipo_facturacion_id=${datos.tipo_facturacion_id}`, {
+          let localesPeticion = await fetch(`${config.BASE_URL}/locales/getLocalesHijosHuerfanos?empresa_codigo=${datos.empresa_codigo}&sucursal_codigo=${datos.sucursal_codigo}&local_codigo_origen=${datos.local_codigo_origen}&pv_afip=${datos.pv_afip}&tipo_facturacion_id=${datos.tipo_facturacion_id}&nuevo=${datos.nuevo}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',

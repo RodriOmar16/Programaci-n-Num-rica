@@ -32,7 +32,7 @@
                   :filled="!nuevo"
                   :readonly="!nuevo"
                   :clearable="nuevo"
-                  @change="getLocalesPadresNuevo()"
+                  @change="getLocalesPadre()"
                 ></v-autocomplete>
               </v-col>
               <v-col cols="12" sm="6" md="4" class="py-1">
@@ -49,7 +49,7 @@
                   :filled="!nuevo"
                   :readonly="!nuevo"
                   :clearable="nuevo"
-                  @change="getLocalesPadresNuevo()"
+                  @change="getLocalesPadre()"
                 ></v-autocomplete>
               </v-col>
               <v-col cols="12" sm="6" md="4" class="py-1">
@@ -94,7 +94,7 @@
                   outlined
                   dense
                   clearable
-                  @change="getLocalesHijos()"
+                  @change="getLocalesPadre()"
                 ></v-autocomplete>
                 <!-- !nuevo && esPadre?  getLocalesHijos() : getLocalesPadres() -->
               </v-col>
@@ -115,7 +115,7 @@
                   @change="controlarLocal()"
                 ></v-autocomplete>-->
                 <v-text-field
-
+                  v-if="!esPadre && !nuevo"
                   v-model="localCopia.local_nombre"
                   outlined
                   dense
@@ -142,7 +142,7 @@
                   @change="controlarLocalOrigen(); getLocalesHijos();"
                 ></v-autocomplete>
                 <!--  -->
-              <!-- :filled="!nuevo && localCopia.local_codigo == localCopia.local_codigo_origen"
+                <!-- :filled="!nuevo && localCopia.local_codigo == localCopia.local_codigo_origen"
                   :readonly="!nuevo && localCopia.local_codigo == localCopia.local_codigo_origen" -->
                 <!-- Local Origen 2 
                 <v-text-field
@@ -171,7 +171,7 @@
                   @change="controlarLocal()"
                 ></v-autocomplete> -->
               </v-col>
-              <v-col cols="12" sm="6" md="12" class="py-1" v-if="esPadre || nuevo">
+              <v-col cols="12" sm="6" md="12" class="py-1" v-if="esPadre">
                 Local Asociados
                 <v-autocomplete
                   v-model="localCopia.localesAsociados"
@@ -285,11 +285,14 @@ export default {
   methods:{
     controlarLocalOrigen(){
       if(this.localCopia.local_codigo_origen){
-        this.localCopia.empresa_nombre = this.localesPadres.filter(e => e.local_codigo == this.localCopia.local_codigo_origen)[0].empresa_nombre;
-        this.localCopia.local_codigo = this.localesPadres.filter(e => e.local_codigo == this.localCopia.local_codigo_origen)[0].local_codigo;
-        this.localCopia.local_nombre = this.localesPadres.filter(e => e.local_codigo == this.localCopia.local_codigo_origen)[0].local_nombre;
-        this.localCopia.local_nombre_origen = this.localesPadres.filter(e => e.local_codigo == this.localCopia.local_codigo_origen)[0].local_nombre;
-        this.localCopia.sucursal_nombre = this.localesPadres.filter(e => e.local_codigo == this.localCopia.local_codigo_origen)[0].sucursal_nombre;
+        let aux = this.localesPadres.filter(e => e.local_codigo == this.localCopia.local_codigo_origen);
+        this.localCopia.empresa_nombre      = aux[0].empresa_nombre;
+        this.localCopia.local_codigo        = aux[0].local_codigo;
+        this.localCopia.local_nombre        = aux[0].local_nombre;
+        this.localCopia.local_nombre_origen = aux[0].local_nombre;
+        this.localCopia.sucursal_nombre     = aux[0].sucursal_nombre;
+        //se adapta el nuevo pv_afip al del nuevo padre para cuando edito al hijo
+        if(!this.esPadre && !this.nuevo){ this.localCopia.pv_afip = aux[0].pv_afip;  }
       }else{
         this.localCopia.local_codigo        = null;
         this.localCopia.local_nombre        = null;
@@ -333,17 +336,24 @@ export default {
       return error;
     },
     //Editar: Inicial Hijos
-    async getLocalesPadres(){
-      let obj = {};
-      if(this.localCopia.empresa_codigo && this.localCopia.sucursal_codigo &&
-         this.localCopia.local_codigo_origen && this.localCopia.pv_afip && 
+    /*async getLocalesPadres(){
+      let obj = {
+        empresa_codigo:       null,
+        sucursal_codigo:      null,
+        local_codigo_origen:  null,
+        pv_afip:              null,
+        tipo_facturacion_id:  null,
+        esPadre:              true
+      };
+
+      if(this.localCopia.empresa_codigo && this.localCopia.sucursal_codigo && this.localCopia.pv_afip && 
          this.localCopia.tipo_facturacion_codigo
       ){
-        obj.empresa_codigo  = this.localCopia.empresa_codigo,
-        obj.sucursal_codigo = this.localCopia.sucursal_codigo
-        obj.local_codigo_origen = this.localCopia.local_codigo_origen,
+        obj.empresa_codigo      = this.localCopia.empresa_codigo,
+        obj.sucursal_codigo     = this.localCopia.sucursal_codigo
         obj.pv_afip             = this.localCopia.pv_afip,
         obj.tipo_facturacion_id = this.localCopia.tipo_facturacion_codigo
+        obj.esPadre             = true;
         
         this.load1 = true;
         this.$store.state.loading = true;
@@ -357,22 +367,97 @@ export default {
         this.localesPadres = res.locales;
         order_list_by(this.localesPadres, 'local_nombre')
       }
+    },*/
+    //NUEVO & EDITAR
+    async getLocalesPadre(){
+      if(this.nuevo){
+        this.localesHijos   = [];  //los disponibles a seleccionar
+        this.localCopia.localesAsociados    = [] //hijos que se fueron agregando, los seleccionados
+        this.localesPadres  = []; //resultado de la consulta
+        this.localCopia.local_codigo_origen = null;
+        this.controlarLocalOrigen();
+      }
+      let obj = {
+        empresa_codigo:       null,
+        sucursal_codigo:      null,
+        local_codigo_origen:  null,
+        pv_afip:              null,
+        tipo_facturacion_id:  null,
+        esPadre:              true
+      };
+      if(this.localCopia.empresa_codigo && this.localCopia.sucursal_codigo){
+        obj.empresa_codigo  = this.localCopia.empresa_codigo,
+        obj.sucursal_codigo = this.localCopia.sucursal_codigo
+
+        if(this.localCopia.pv_afip && this.localCopia.tipo_facturacion_codigo && !this.nuevo){
+          obj.pv_afip             = this.localCopia.pv_afip,
+          obj.tipo_facturacion_id = this.localCopia.tipo_facturacion_codigo
+        }
+
+        this.load1 = true;
+        this.$store.state.loading = true; //getLocalesPadresHijos
+        const res = await this.$store.dispatch(`localesStore/getLocalesPadresHijos`,  obj);
+        this.$store.state.loading = false;
+        this.load1 = false;
+
+        if (res.resultado == 0){
+          return this.$store.dispatch('show_snackbar', { text: res.message, color: 'error'})
+        }
+        console.log("res: ", res);
+
+        console.log("res.locales.padres: ", res.locales.padres);
+        this.localesPadres = res.locales.padres;
+        console.log("this.localesPadres: ", this.localesPadres);
+        order_list_by(this.localesPadres, 'local_nombre')           
+      }
     },
+    //Nuevos
+    /*async getLocalesPadresNuevo(){
+      
+
+      let obj = {
+        empresa_codigo:       null,
+        sucursal_codigo:      null,
+        local_codigo_origen:  null,
+        pv_afip:              null,
+        tipo_facturacion_id:  null,
+        esPadre:              true
+      };
+      if(this.localCopia.empresa_codigo && this.localCopia.sucursal_codigo){
+        obj.empresa_codigo  = this.localCopia.empresa_codigo,
+        obj.sucursal_codigo = this.localCopia.sucursal_codigo
+        this.load1 = true;
+        this.$store.state.loading = true; //getLocalesPadresHijos
+        const res = await this.$store.dispatch(`localesStore/getLocalesPadresHijos`,  obj);
+        this.$store.state.loading = false;
+        this.load1 = false;
+
+        if (res.resultado == 0){
+          return this.$store.dispatch('show_snackbar', { text: res.message, color: 'error'})
+        }
+        console.log("res: ", res);
+
+        console.log("res.locales.padres: ", res.locales.padres);
+        this.localesPadres = res.locales.padres;
+        console.log("this.localesPadres: ", this.localesPadres);
+        order_list_by(this.localesPadres, 'local_nombre')           
+      }
+    },*/
     //Nuevos/Editar: Inicial Padre
     async getLocalesHijos(){
       if(this.localCopia.empresa_codigo && this.localCopia.sucursal_codigo && 
         this.localCopia.local_codigo_origen && this.localCopia.tipo_facturacion_codigo){
-          console.log("emtroopoo: ");
+          console.log("entrooooo: ");
         let obj = {
           empresa_codigo:       this.localCopia.empresa_codigo,
           sucursal_codigo:      this.localCopia.sucursal_codigo,
           local_codigo_origen:  this.localCopia.local_codigo_origen,
           tipo_facturacion_id:  this.localCopia.tipo_facturacion_codigo,
-          pv_afip:              this.nuevo ? null : this.localCopia.pv_afip,
+          pv_afip:              this.nuevo ? null : this.localCopia.pv_afip
         };
 
         this.load1 = true;
-        this.$store.state.loading = true;//getLocalesHijosHuerfanos
+        this.$store.state.loading = true;// getLocalesHijosHuerfanos
         const res = await this.$store.dispatch('localesStore/getLocalesPadresHijos', obj)
         this.$store.state.loading = false;
         this.load1 = false;
@@ -401,41 +486,6 @@ export default {
           }
         */
         if(!this.nuevo) this.localCopia.localesAsociados = this.localesHijos.filter(e => e.local_codigo_origen == this.localCopia.local_codigo_origen);
-      }
-    },
-    //Nuevos
-    async getLocalesPadresNuevo(){
-      this.localesHijos   = [];  //los disponibles a seleccionar
-      this.localCopia.localesAsociados    = [] //hijos que se fueron agregando, los seleccionados
-      this.localesPadres  = []; //resultado de la consulta
-      this.localCopia.local_codigo_origen = null;
-      this.controlarLocalOrigen();
-
-      let obj = {
-        empresa_codigo:       null,
-        sucursal_codigo:      null,
-        local_codigo_origen:  null,
-        pv_afip:              null,
-        tipo_facturacion_id:  null
-      };
-      if(this.localCopia.empresa_codigo && this.localCopia.sucursal_codigo){
-        obj.empresa_codigo  = this.localCopia.empresa_codigo,
-        obj.sucursal_codigo = this.localCopia.sucursal_codigo
-        this.load1 = true;
-        this.$store.state.loading = true;
-        const res = await this.$store.dispatch(`localesStore/getLocalesPadresHijos`,  obj);
-        this.$store.state.loading = false;
-        this.load1 = false;
-
-        if (res.resultado == 0){
-          return this.$store.dispatch('show_snackbar', { text: res.message, color: 'error'})
-        }
-        console.log("res: ", res);
-
-        console.log("res.locales.padres: ", res.locales.padres);
-        this.localesPadres = res.locales.padres;
-        console.log("this.localesPadres: ", this.localesPadres);
-        order_list_by(this.localesPadres, 'local_nombre')           
       }
     },
     /*async getLocalesHijos(){
@@ -549,16 +599,22 @@ export default {
       }
     },*/
     limpiar(){
-      /*this.local.empresa_codigo             = null;
-      this.local.sucursal_codigo            = null;
-      this.local.tipo_facturacion_codigo    = null;
-      this.local.pv_afip                    = null;
-      this.local.fecha_habilitacion         = null;
-      this.local.local_codigo_origen        = null;
-      this.local.localesAsociados           = [];
-      this.localesAsoc                    = [];
-      this.locales                          = [];
-      this.localLocal                       = null;*/
+      this.local = {
+          empresa_codigo: null,
+          empresa_nombre: '',
+          sucursal_codigo: null,
+          sucursal_nombre: '',
+          fecha_habilitacion: '',
+          inhabilitado: 0,
+          local_codigo: 0,
+          local_nombre: '',
+          local_codigo_origen: 0,
+          local_nombre_origen: '',
+          pv_afip: '',
+          tipo_facturacion_codigo: 0,
+          tipo_facturacion_nombre: '',
+          localesAsociados: []
+      }
     },
     limpiarCopia(){
       this.localCopia = {
@@ -629,9 +685,9 @@ export default {
           }else{
             //es un hijo
             console.log("es hijo");
-            //await this.getLocalesPadres();
+            await this.getLocalesPadre();
           }
-        }
+        }else this.esPadre = true;
       }else{
         this.limpiar();
       }

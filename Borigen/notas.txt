@@ -29,3 +29,8 @@ no exista ya uno HABILITADO.
  muestro y dejo seleccionar los locales huerfanos(locales sin padres, locales inhabilitados con padres) disponibles. (getLocalesPadresHijos)
 	Si selecciono locales asociados y cambio de empresa o de sucursal reseteo el local_codigo_origen y los localesAsociados, y traigo 
 	todos los LOCALES habilitados (getLocalesPadresHijos)
+
+-------------------------------------------------------------------------------------------------
+
+padres que sean padres habilitados para en la misma empresa, misma sucursal, mismo tipo de facturacion y también padres habilitados que cumplan con las condiciones que los padres para ser de nuevos
+si cambia de padre debería ser cambiado el pv_afip del hijo(volverse el mismo que el del padre)

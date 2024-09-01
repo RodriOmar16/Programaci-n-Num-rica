@@ -373,7 +373,6 @@ export default {
       this.objModal.tiposFacturacion = this.tiposFacturacion;
       this.objModal.activo = true;*/
       //console.log("item: ", item);
-      let elem = JSON.parse(JSON.stringify(item));
       if(!item){
         this.objModal.nuevo = true;
         this.objModal.local = {
@@ -393,6 +392,7 @@ export default {
           localesAsociados: []
         };
       }else{
+        let elem = JSON.parse(JSON.stringify(item));
         this.objModal.nuevo = false;
         await this.detAsociados(item);
         this.objModal.local = elem;

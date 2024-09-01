@@ -1012,7 +1012,71 @@ export default{
   getLocalesPadresOracle: async (req, res, next) =>{
     try {
       let listado = [];
-      let sql = `
+            //´
+      let sqlPadres = `
+        -- busco los padres disponibles, aquellos habilitados que están en LOCALES y no están en LOCALES_PV(excluir también aquellos que tiene el local_codigo_origen = null)
+        SELECT 
+            EMP.CODIGO              EMPRESA_CODIGO,  
+            EMP.NOMBRE              EMPRESA_NOMBRE,
+            SUC.CODIGO              SUCURSAL_CODIGO,
+            SUC.NOMBRE              SUCURSAL_NOMBRE,
+            NULL                    FECHA_HABILITACION,
+            NVL(L.INHABILITADO, 0) INHABILITADO,
+            L.CODIGO               LOCAL_CODIGO,
+            L.NOMBRE               LOCAL_NOMBRE,
+            L.CODIGO               LOCAL_CODIGO_ORIGEN,
+            L.NOMBRE               LOCAL_CODIGO_NOMBRE,
+            NULL                    PV_AFIP,
+            NULL                    TIPO_FACTURACION_CODIGO,
+            NULL                    TIPO_FACTURACION_NOMBRE
+        FROM GESTION.LOCALES L,
+             TELECOM.SUCURSALES@TELECOM.SERVERORAC.CBB.NET   SUC,
+             TELECOM.EMPRESAS@TELECOM.SERVERORAC.CBB.NET     EMP
+        WHERE NVL(L.INHABILITADO,0) = 0
+          AND L.SUCURSAL_CODIGO     = SUC.CODIGO
+          AND SUC.CODIGO            = ${req.sucursal_codigo}
+          AND L.EMPRESA_CODIGO      = EMP.CODIGO
+          AND EMP.CODIGO            = ${req.empresa_codigo}
+          AND NOT EXISTS (SELECT 1 FROM GESTION.LOCALES_PV LP
+                          WHERE LP.LOCAL_CODIGO_ORIGEN = L.CODIGO 
+                             OR (LP.LOCAL_CODIGO = L.CODIGO AND NVL(LP.LOCAL_CODIGO_ORIGEN,0) = 0))
+        `;
+      if(campoNoVacio(req.pv_afip) && campoNoVacio(req.tipo_facturacion_id)){
+        sqlPadres += `
+          UNION ALL 
+          -- padres que sean padres habilitados para en la misma empresa, misma sucursal, mismo tipo de facturacion
+           SELECT 
+            EMP.CODIGO              EMPRESA_CODIGO,  
+            EMP.NOMBRE              EMPRESA_NOMBRE,
+            SUC.CODIGO              SUCURSAL_CODIGO,
+            SUC.NOMBRE              SUCURSAL_NOMBRE,
+            NULL                    FECHA_HABILITACION,
+            NVL(L.INHABILITADO, 0)  INHABILITADO,
+            L.CODIGO                LOCAL_CODIGO,
+            L.NOMBRE                LOCAL_NOMBRE,
+            L.CODIGO                LOCAL_CODIGO_ORIGEN,
+            L.NOMBRE                LOCAL_CODIGO_NOMBRE,
+            NULL                    PV_AFIP,
+            TF.ID                   TIPO_FACTURACION_CODIGO,
+            TF.DESCRIPCION          TIPO_FACTURACION_NOMBRE
+        FROM GESTION.LOCALES L,
+             GESTION.LOCALES_PV LP,
+             GESTION.TIPOS_FACTURACION TF,
+             TELECOM.SUCURSALES@TELECOM.SERVERORAC.CBB.NET   SUC,
+             TELECOM.EMPRESAS@TELECOM.SERVERORAC.CBB.NET     EMP
+        WHERE NVL(L.INHABILITADO,0) = 0
+          AND L.SUCURSAL_CODIGO     = SUC.CODIGO
+          AND SUC.CODIGO            = ${req.sucursal_codigo}
+          AND L.EMPRESA_CODIGO      = EMP.CODIGO
+          AND EMP.CODIGO            = ${req.empresa_codigo}
+          AND L.CODIGO              = LP.LOCAL_CODIGO_ORIGEN
+          AND LP.TIPO_FACTURACION_ID= TP.ID
+          AND TP.ID                 = ${req.tipo_facturacion_id}
+
+        `;
+      }
+
+      /*let sql = `
         -- LOCALES QUE ACABAN DE CREARSE, POR LO TANTO, NO ESTAN EN LOCALES_PV
         SELECT
           EMP.CODIGO              EMPRESA_CODIGO,  
@@ -1135,10 +1199,11 @@ export default{
           AND LO.SUCURSAL_CODIGO = ${req.sucursal_codigo} -- SUCURSAL
           AND LO.SUCURSAL_CODIGO = SUC.CODIGO
           AND LP.LOCAL_CODIGO_ORIGEN = ${req.local_codigo_origen}
-          AND LP.LOCAL_CODIGO <> LP.LOCAL_CODIGO_ORIGEN*/
-      `  
-      console.log("sql: ",sql);
-      let result = await db.executeAcc(sql, [], false)
+          AND LP.LOCAL_CODIGO <> LP.LOCAL_CODIGO_ORIGEN
+      `  */
+      //console.log("sql: ",sql);
+      console.log("sqlPadres: ",sqlPadres);
+      let result = await db.executeAcc(sqlPadres, [], false)
       if (result.rows.length > 0){
         result.rows.forEach(e => {
           let local = {
@@ -1155,7 +1220,6 @@ export default{
             pv_afip: e[10],
             tipo_facturacion_codigo: e[11],
             tipo_facturacion_nombre: e[12],
-            tipo: e[13],
             localesAsociados: [],
           }
           listado.push(local)
@@ -1274,13 +1338,13 @@ export default{
             TELECOM.EMPRESAS@TELECOM.SERVERORAC.CBB.NET     EMP
         WHERE LOC.EMPRESA_CODIGO  = EMP.CODIGO
           AND LOC.EMPRESA_CODIGO  = LP.EMPRESA_ID
+          AND LP.EMPRESA_ID       = ${req.empresa_codigo} -- EMPRESA
           AND NVL(LP.LOCAL_CODIGO_ORIGEN, 0) = 0
           AND LOC.SUCURSAL_CODIGO = SUC.CODIGO
           AND LOC.SUCURSAL_CODIGO = ${req.sucursal_codigo} -- SUCURSAL
           AND NVL(LP.INHABILITADO, 0) = 0        
           AND LP.LOCAL_CODIGO = LOC.CODIGO
           AND LP.TIPO_FACTURACION_ID = ${req.tipo_facturacion_id}
-          ${req.empresa_codigo ? `AND LP.EMPRESA_ID = ${req.empresa_codigo}` : `` } -- EMPRESA
         UNION
         -- LOCALES QUE ESTAN EN LOCALES_PV, PERO INHABILITADOS Y QUE ADEMÁS NO TENGAN UN PADRE ASOCIADO
         SELECT 
