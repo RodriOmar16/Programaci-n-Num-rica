@@ -1242,53 +1242,7 @@ export default{
     try {
       let listado = [];
       let sql = `
-        SELECT DISTINCT
-            LP.TIPO_FACTURACION_ID,
-            L.CODIGO,
-            L.NOMBRE,
-            LP.EMPRESA_ID
-        FROM GESTION.LOCALES    L,
-             GESTION.LOCALES_PV LP 
-        WHERE L.CODIGO = LP.LOCAL_CODIGO
-          AND NVL(LP.INHABILITADO, 0) = 0
-          AND LP.EMPRESA_ID = ${req.empresa_codigo}
-          AND L.SUCURSAL_CODIGO = ${req.sucursal_codigo}
-          AND LP.LOCAL_CODIGO_ORIGEN = ${req.local_codigo_origen}
-          AND LP.LOCAL_CODIGO <> LP.LOCAL_CODIGO_ORIGEN
-      `  
-
-      let result = await db.executeAcc(sql, [], false)
-      if (result.rows.length > 0){
-        result.rows.forEach(e => {
-          let local = {
-            tipo_facturacion_codigo: e[0],
-            local_codigo: e[1],
-            local_nombre: e[2],
-            empresa_codigo: e[3]
-          }
-          listado.push(local)
-        })
-      }
-      return {
-        resultado: 1,
-        msj: 'OK',
-        hijos: listado
-      }
-    } catch (error) {
-      return {
-        resultado: 0,
-        locales: [],
-        message: 'Ocurrió un error al obtener información de los locales AFIP (getLocalesHijosOracle): ' + error.message
-      }
-    }
-  },
-  getLocalesHijosEditarOracle: async (req, res, next) =>{
-    try {
-      let listado = [];
-      let sql = `
-        
-        ${req.padre == 0 ? 
-          `-- LOCALES QUE ACABAN DE CREARSE, POR LO TANTO, NO ESTAN EN LOCALES_PV
+        -- LOCALES QUE ACABAN DE CREARSE, POR LO TANTO, NO ESTAN EN LOCALES_PV
           SELECT
           EMP.CODIGO              EMPRESA_CODIGO,  
           EMP.NOMBRE              EMPRESA_NOMBRE,
@@ -1398,25 +1352,26 @@ export default{
           LP.LOCAL_CODIGO_ORIGEN    LOCAL_CODIGO_ORIGEN,
           (SELECT L.NOMBRE FROM GESTION.LOCALES L WHERE L.CODIGO = LP.LOCAL_CODIGO_ORIGEN)                  LOCAL_CODIGO_NOMBRE,
           LP.CODIGO_EMISION         PV_AFIP,
-          LP.TIPO_FACTURACION_ID    TIPO_FACTURACION_CODIGO,
-          (SELECT TF.DESCRIPCION FROM GESTION.TIPOS_FACTURACION TF WHERE TF.ID = LP.TIPO_FACTURACION_ID)  TIPO_FACTURACION_NOMBRE,
+          TF.ID                     TIPO_FACTURACION_CODIGO,
+          TF.DESCRIPCION            TIPO_FACTURACION_NOMBRE,
           2 TIPO
         FROM GESTION.LOCALES_PV LP,
-            GESTION.LOCALES LO,
-            TELECOM.SUCURSALES@TELECOM.SERVERORAC.CBB.NET   SUC,
-            TELECOM.EMPRESAS@TELECOM.SERVERORAC.CBB.NET     EMP
+             GESTION.LOCALES LO,
+             GESTION.TIPOS_FACTURACION TF
+             TELECOM.SUCURSALES@TELECOM.SERVERORAC.CBB.NET   SUC,
+             TELECOM.EMPRESAS@TELECOM.SERVERORAC.CBB.NET     EMP
         WHERE NVL(LP.INHABILITADO, 0) = 0
-          AND LP.EMPRESA_ID = ${req.empresa_codigo} -- EMPRESA
-          AND LO.EMPRESA_CODIGO = EMP.CODIGO
-          AND LP.LOCAL_CODIGO = LO.CODIGO
-          AND LO.SUCURSAL_CODIGO = ${req.sucursal_codigo} -- SUCURSAL
-          AND LO.SUCURSAL_CODIGO = SUC.CODIGO
-          AND LP.LOCAL_CODIGO_ORIGEN = ${req.local_codigo_origen}
+          AND LP.LOCAL_CODIGO         = LO.CODIGO
+          AND LP.EMPRESA_ID           = LO.EMPRESA_CODIGO
+          AND LO.EMPRESA_CODIGO       = EMP.CODIGO
+          AND EMP.CODIGO              = ${req.empresa_codigo} -- EMPRESA
+          AND LO.SUCURSAL_CODIGO      = SUC.CODIGO
+          AND SUC.CODIGO              = ${req.sucursal_codigo} -- SUCURSAL
+          AND LP.LOCAL_CODIGO_ORIGEN  = ${req.local_codigo_origen}
           AND LP.LOCAL_CODIGO <> LP.LOCAL_CODIGO_ORIGEN
-          AND LP.TIPO_FACTURACION_ID = ${req.tipo_facturacion_id}
-        ` : 
-        `SELECT DE PADRES
-         ` }
+          AND LP.TIPO_FACTURACION_ID  = TF.ID
+          AND TF.ID                   = ${req.tipo_facturacion_id}
+          AND LP.CODIGO_EMISION       = ${req.pv_afip}
       `  
       console.log("sql: ",sql);
       let result = await db.executeAcc(sql, [], false)
@@ -1455,190 +1410,18 @@ export default{
       }
     }
   },
-  getLocalesPtoVtaOracle: async (req, res, next) =>{
-    try {
-      console.log("req: ", req);
-      let listado = [];
-      let sql = `
-        -- LOCALES QUE ACABAN DE CREARSE, POR LO TANTO, NO ESTAN EN LOCALES_PV
-        SELECT LO.*, 1 TIPO
-        FROM GESTION.LOCALES LO
-        WHERE NVL(LO.INHABILITADO, 0) = 0
-          AND LO.SUCURSAL_CODIGO = ${req.sucursal_codigo} -- SUCURSAL
-          AND LO.EMPRESA_CODIGO = ${req.empresa_codigo}  -- EMPRESA
-          AND NOT EXISTS (SELECT 1
-                          FROM GESTION.LOCALES_PV LP
-                          WHERE LP.LOCAL_CODIGO = LO.CODIGO)         
-        UNION ALL
-        -- LOCALES QUE ESTAN EN LOCALES_PV, HABILITADOS Y QUE NO TIENEN ASOCIADO UN PADRE
-        SELECT LOC.*, 1 TIPO
-        FROM GESTION.LOCALES_PV LP,
-            GESTION.LOCALES LOC
-        WHERE LP.EMPRESA_ID = ${req.empresa_codigo} -- EMPRESA
-          AND NVL(LP.INHABILITADO, 0) = 0
-          AND NVL(LP.LOCAL_CODIGO_ORIGEN, 0) = 0
-          AND (SELECT LO.SUCURSAL_CODIGO
-              FROM GESTION.LOCALES LO
-              WHERE LO.CODIGO = LP.LOCAL_CODIGO) = ${req.sucursal_codigo} -- SUCURSAL
-          AND LP.LOCAL_CODIGO = LOC.CODIGO
-        UNION
-        -- LOCALES QUE ESTAN EN LOCALES_PV, PERO INHABILITADOS Y QUE ADEMÁS NO TENGAN UN PADRE ASOCIADO
-        SELECT LO.*, 1 TIPO
-        FROM GESTION.LOCALES_PV LP,
-            GESTION.LOCALES LO
-        WHERE LP.INHABILITADO = 1
-          AND LP.LOCAL_CODIGO = LO.CODIGO
-          AND (SELECT LOC.SUCURSAL_CODIGO
-              FROM GESTION.LOCALES LOC
-              WHERE LOC.CODIGO = LP.LOCAL_CODIGO) = ${req.sucursal_codigo} -- SUCURSAL
-          AND LP.EMPRESA_ID = ${req.empresa_codigo} -- EMPRESA
-          AND LP.LOCAL_CODIGO <> NVL(LP.LOCAL_CODIGO_ORIGEN, 0)
-          AND NOT EXISTS (SELECT 1
-                          FROM GESTION.LOCALES_PV LPP
-                          WHERE LPP.LOCAL_CODIGO = LP.LOCAL_CODIGO
-                            AND NVL(LPP.INHABILITADO, 0) = 0
-                            AND (NVL(LPP.LOCAL_CODIGO_ORIGEN, 0) = 0 OR NVL(LPP.LOCAL_CODIGO_ORIGEN, 0) <> 0)
-                            AND (SELECT LOC.SUCURSAL_CODIGO
-                                FROM GESTION.LOCALES LOC
-                                WHERE LOC.CODIGO = LPP.LOCAL_CODIGO) = ${req.sucursal_codigo} -- SUCURSAL
-                            AND LPP.EMPRESA_ID = ${req.empresa_codigo} -- EMPRESA
-                            )
-      `
-
-      //if(campoNoVacio(req.local_codigo)){     sql += ` AND LP.LOCAL_CODIGO = ${req.local_codigo}`  }
-      console.log("sql: ", sql);
-      let result = await db.executeAcc(sql, [], false)
-      if (result.rows.length > 0){
-        result.rows.forEach(e => {
-          let local = {
-            local_acc_codigo: e[0],
-            local_acc_nombre: e[1],
-            empresa_codigo: e[2],
-            empresa_nombre: e[3],
-            sucursal_codigo: e[4],
-            sucursal_nombre: e[5]
-          }
-          listado.push(local)
-        })
-      }
-      return {
-        resultado: 1,
-        msj: 'OK',
-        locales: listado
-      }
-    } catch (error) {
-      return {
-        resultado: 0,
-        locales: [],
-        msj: 'Ocurrió un error al obtener información de los locales AFIP (getLocalesPtoVtaOracle): ' + error.message
-      }
-    }
-  },
-  getLocalesPtoVtaEditarOracle: async(req,res, next) =>{
-    try {
-      console.log("req: ", req);
-      let listado = [];
-      let sql = `
-        -- LOCALES QUE ACABAN DE CREARSE, POR LO TANTO, NO ESTAN EN LOCALES_PV
-        SELECT LO.*, 1 TIPO
-        FROM GESTION.LOCALES LO
-        WHERE NVL(LO.INHABILITADO, 0) = 0
-          AND LO.SUCURSAL_CODIGO = ${req.sucursal_codigo} -- SUCURSAL
-          AND LO.EMPRESA_CODIGO = ${req.empresa_codigo}  -- EMPRESA
-          AND NOT EXISTS (SELECT 1
-                          FROM GESTION.LOCALES_PV LP
-                          WHERE LP.LOCAL_CODIGO = LO.CODIGO)         
-        UNION ALL
-        -- LOCALES QUE ESTAN EN LOCALES_PV, HABILITADOS Y QUE NO TIENEN ASOCIADO UN PADRE
-        SELECT LOC.*, 1 TIPO
-        FROM GESTION.LOCALES_PV LP,
-            GESTION.LOCALES LOC
-        WHERE LP.EMPRESA_ID = ${req.empresa_codigo} -- EMPRESA
-          AND NVL(LP.INHABILITADO, 0) = 0
-          AND NVL(LP.LOCAL_CODIGO_ORIGEN, 0) = 0
-          AND LP.TIPO_FACTURACION_ID = ${req.tipo_facturacion}
-          AND (SELECT LO.SUCURSAL_CODIGO
-              FROM GESTION.LOCALES LO
-              WHERE LO.CODIGO = LP.LOCAL_CODIGO) = ${req.sucursal_codigo} -- SUCURSAL
-          AND LP.LOCAL_CODIGO = LOC.CODIGO
-        UNION
-        -- LOCALES QUE ESTAN EN LOCALES_PV, PERO INHABILITADOS Y QUE ADEMÁS NO TENGAN UN PADRE ASOCIADO
-        SELECT LO.*, 1 TIPO
-        FROM GESTION.LOCALES_PV LP,
-            GESTION.LOCALES LO
-        WHERE LP.INHABILITADO = 1
-          AND LP.LOCAL_CODIGO = LO.CODIGO
-          AND (SELECT LOC.SUCURSAL_CODIGO
-              FROM GESTION.LOCALES LOC
-              WHERE LOC.CODIGO = LP.LOCAL_CODIGO) = ${req.sucursal_codigo} -- SUCURSAL
-          AND LP.EMPRESA_ID = ${req.empresa_codigo} -- EMPRESA
-          AND LP.LOCAL_CODIGO <> NVL(LP.LOCAL_CODIGO_ORIGEN, 0)
-          AND NOT EXISTS (SELECT 1
-                          FROM GESTION.LOCALES_PV LPP
-                          WHERE LPP.LOCAL_CODIGO = LP.LOCAL_CODIGO
-                            AND NVL(LPP.INHABILITADO, 0) = 0
-                            AND (NVL(LPP.LOCAL_CODIGO_ORIGEN, 0) = 0 OR NVL(LPP.LOCAL_CODIGO_ORIGEN, 0) <> 0)
-                            AND LPP.TIPO_FACTURACION_ID = ${req.tipo_facturacion}
-                            AND (SELECT LOC.SUCURSAL_CODIGO
-                                FROM GESTION.LOCALES LOC
-                                WHERE LOC.CODIGO = LPP.LOCAL_CODIGO) = ${req.sucursal_codigo} -- SUCURSAL
-                            AND LPP.EMPRESA_ID = ${req.empresa_codigo} -- EMPRESA
-                            )
-        UNION ALL
-        -- LOCALES QUE TENGAN COMO PADRE A LOCAL_PADRE
-        SELECT LO.*, 2 TIPO
-        FROM GESTION.LOCALES_PV LP,
-            GESTION.LOCALES LO
-        WHERE NVL(LP.INHABILITADO, 0) = 0
-          AND LP.EMPRESA_ID = ${req.empresa_codigo} -- EMPRESA
-          AND LP.LOCAL_CODIGO = LO.CODIGO
-          AND LO.SUCURSAL_CODIGO = ${req.sucursal_codigo} -- SUCURSAL
-          AND LP.LOCAL_CODIGO_ORIGEN = ${req.local_codigo}
-          AND LP.TIPO_FACTURACION_ID = ${req.tipo_facturacion}
-          AND LP.LOCAL_CODIGO <> LP.LOCAL_CODIGO_ORIGEN
-      `
-
-      //if(campoNoVacio(req.local_codigo)){     sql += ` AND LP.LOCAL_CODIGO = ${req.local_codigo}`  }
-      console.log("sql: ", sql);
-      let result = await db.executeAcc(sql, [], false)
-      if (result.rows.length > 0){
-        result.rows.forEach(e => {
-          let local = {
-            local_acc_codigo: e[0],
-            local_acc_nombre: e[1],
-            empresa_codigo: e[2],
-            empresa_nombre: e[3],
-            sucursal_codigo: e[4],
-            sucursal_nombre: e[5]
-          }
-          listado.push(local)
-        })
-      }
-      return {
-        resultado: 1,
-        msj: 'OK',
-        locales: listado
-      }
-    } catch (error) {
-      return {
-        resultado: 0,
-        locales: [],
-        msj: 'Ocurrió un error al obtener información de los locales AFIP (getLocalesPtoVtaOracle): ' + error.message
-      }
-    }
-  },
   crearLocalAfipOracle: async(req, res, next) => {
     try {
-      let localesAux   = req.locales_asoc.filter(e => e.local_acc_codigo != req.local.localOrigen.local_acc_codigo);
-      req.locales_asoc = localesAux;
+      /*let localesAux   = req.locales_asociados.filter(e => e.local_acc_codigo != req.local.localOrigen.local_acc_codigo);
+      req.locales_asociados = localesAux;*/
 
       let sqlAsociados = ``;
       let sqlAsoc = '';
       
-      if(req.locales_asoc.length != 0){
-        let n = req.locales_asoc.length;
+      if(req.locales_asociados.length != 0){
+        let n = req.locales_asociados.length;
         for(let i=0; i<n ;i++){
-          sqlAsociados += `SELECT ${req.locales_asoc[i].local_acc_codigo}, '001', LPAD(:p_pv_afip, 4,'0'), TO_DATE(:p_fecha_hab,'DD/MM/RRRR'), NULL, :p_tipo_facturacion, :p_empresa_id, :p_local_codigo_origen FROM DUAL `
+          sqlAsociados += `SELECT ${req.locales_asociados[i].local_codigo}, '001', LPAD(:p_pv_afip, 4,'0'), TO_DATE(:p_fecha_hab,'DD/MM/RRRR'), NULL, :p_tipo_facturacion, :p_empresa_id, :p_local_codigo_origen FROM DUAL `
           if(i != (n-1)){
             sqlAsociados += ' UNION ALL '
           }
@@ -1665,15 +1448,15 @@ export default{
           V_MSJ           VARCHAR2(4000);
 
       BEGIN
-          -- consulto si no existe antes un pto venta con el mismo local_codigo & local_codigo origen
+          -- consulto si no existe antes un pto venta con el mismo local_codigo & local_codigo_origen
           SELECT COUNT(*) INTO V_CONT_LOCAL
           FROM GESTION.LOCALES_PV LP
-          WHERE LP.LOCAL_CODIGO        = :p_local_codigo_origen 
-            AND LP.LOCAL_CODIGO_ORIGEN = :p_local_codigo_origen
-            AND LP.TIPO_FACTURACION_ID = :p_tipo_facturacion
-            AND LP.CODIGO_EMISION      = :p_pv_afip
-            AND LP.EMPRESA_ID          = :p_empresa_id
-            AND NVL(LP.INHABILITADO,0) = 0;
+          WHERE LP.LOCAL_CODIGO               = :p_local_codigo_origen 
+            AND NVL(LP.LOCAL_CODIGO_ORIGEN,0) = :p_local_codigo_origen
+            AND LP.TIPO_FACTURACION_ID        = :p_tipo_facturacion
+            AND LP.CODIGO_EMISION             = :p_pv_afip
+            AND LP.EMPRESA_ID                 = :p_empresa_id
+            AND NVL(LP.INHABILITADO,0)        = 0;
           IF  NVL(V_CONT_LOCAL,0) > 0 THEN
               V_MSJ := 'Ya se existe un pto de venta con el mismo local origen.';
               RAISE V_ERROR;
@@ -1712,11 +1495,11 @@ export default{
       END; `
 
       let param = {
-        p_local_codigo_origen:  req.local.localOrigen.local_acc_codigo,
-        p_tipo_facturacion:     req.local.tipoFacturacion,
+        p_local_codigo_origen:  req.local.local_codigo_origen,
+        p_tipo_facturacion:     req.local.tipo_facturacion,
         p_empresa_id:           req.local.empresa_codigo,
         p_pv_afip:              req.local.pv_afip,
-        p_fecha_hab:            req.local.fechaHabilitacion,
+        p_fecha_hab:            req.local.fecha_habilitacion,
         p_resultado: {type: oracledb.NUMBER, dir: oracledb.BIND_OUT, maxSize: 1000},
         p_msj: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 1000 }
       }
@@ -1740,21 +1523,19 @@ export default{
   editarLocalAfipOracle: async(req, res, next) =>{
     console.log("req: ", req);
     try {
-      let localesAux   = req.locales_asoc.filter(e => e.local_acc_codigo != req.local.localOrigen.local_acc_codigo);
-      req.locales_asoc = localesAux;
       let sql = '';
       //estoy editando al padre ?
-      if(campoNoVacio(req.local.local)){
+      if(req.local.local_codigo_origen == req.local.local_codigo){
         let sqlNoAsociados = ``;
         let sqlAsociados = '';
 
-        if(req.locales_asoc.length > 0){
-          let n = req.locales_asoc.length;
+        if(req.locales_asociados.length > 0){
+          let n = req.locales_asociados.length;
           let cursor = '';
           for(let i=0; i<n ;i++){
             cursor += `SELECT :p_pv_afip CODIGO_EMISION,
                               :p_tipo_facturacion_id TIPO_FACTURACION_ID,
-                              ${req.locales_asoc[i].local_acc_codigo} LOCAL_CODIGO,
+                              ${req.locales_asociados[i].local_codigo} LOCAL_CODIGO,
                               :p_local_codigo_origen LOCAL_CODIGO_ORIGEN,
                               :p_empresa_id EMPRESA_ID
                       FROM DUAL
@@ -1793,7 +1574,7 @@ export default{
                     RAISE V_ERROR;
                 END IF;
 
-              -- se inhabilitan para ese codigo origen los que no vengan
+              -- se inhabilitan para ese local_codigo_origen los que no vengan
               UPDATE GESTION.LOCALES_PV LP
               SET LP.INHABILITADO = 1
               WHERE LP.TIPO_FACTURACION_ID  = :p_tipo_facturacion_id
@@ -1846,12 +1627,12 @@ export default{
                 UPDATE GESTION.LOCALES_PV LP
                 SET LP.TIPO_FACTURACION_ID  = :p_tipo_facturacion_id,
                     LP.FECHA_HABILITACION   = TO_DATE(:p_fecha_hab, 'DD/MM/RRRR')
-                WHERE LP.LOCAL_CODIGO               = :p_local_codigo_origen
-                  AND LP.LOCAL_CODIGO_ORIGEN        = :p_local_codigo_origen
-                  AND LP.EMPRESA_ID                 = :p_empresa_id
-                  AND LP.TIPO_FACTURACION_ID        = :p_tipo_facturacion_id
-                  AND LP.CODIGO_EMISION             = :p_pv_afip
-                  AND LP.LOCAL_CODIGO_ORIGEN        = LP.LOCAL_CODIGO;
+                WHERE LP.LOCAL_CODIGO          = :p_local_codigo_origen
+                  AND LP.LOCAL_CODIGO_ORIGEN   = :p_local_codigo_origen
+                  AND LP.EMPRESA_ID            = :p_empresa_id
+                  AND LP.TIPO_FACTURACION_ID   = :p_tipo_facturacion_id
+                  AND LP.CODIGO_EMISION        = :p_pv_afip
+                  AND LP.LOCAL_CODIGO_ORIGEN   = LP.LOCAL_CODIGO;
             EXCEPTION
                 WHEN OTHERS THEN
                     V_MSJ := 'Ocurró un error general al editar los datos del local origen: ' || substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
@@ -1862,24 +1643,14 @@ export default{
                 RAISE V_ERROR;
             END IF;
 
-            -- Controlo si el local padre si al menos un hijo
-            SELECT COUNT(*) INTO V_CONT
-            FROM GESTION.LOCALES_PV LP
-            WHERE LP.TIPO_FACTURACION_ID  = :p_tipo_facturacion_id
-                AND LP.EMPRESA_ID           = :p_empresa_id
-                AND LP.LOCAL_CODIGO_ORIGEN  = :p_local_codigo_origen
-                AND LP.CODIGO_EMISION       = :p_pv_afip
-                AND NVL(LP.INHABILITADO, 0) = 0
-                AND LP.LOCAL_CODIGO_ORIGEN  <> LP.LOCAL_CODIGO
+            -- inserto nuevos asociados de la web que no estén en la base 
+            -- deshabilito los viejos que no vengan de la web
+            ${sqlAsociados}
 
-            IF NVL(V_CONT, 0) > 0 THEN
-              -- Tiene asociados en la base
-              ${/*sqlCursor*/ sqlAsociados}
-            ELSE
-              -- No tiene asociados
-            END IF;
-            -- actualizo los datos de los hijos
-            
+            -- exito
+            COMMIT;
+            :p_resultado  := 1;
+            :p_msj        := 'Ok';
 
         EXCEPTION
             WHEN V_ERROR THEN
@@ -1892,26 +1663,28 @@ export default{
                 :p_resultado := 0;
         END;
         `       
-      }else console.log("no entroooooo.........");
+      }else{
+
+      }
 
       let param = {
-        //p_local_codigo:         r
-        p_local_codigo_origen:  req.local.localOrigen.local_acc_codigo,
-        p_tipo_facturacion_id:     req.local.tipoFacturacion,
+        p_local_codigo:         req.local.local_codigo,
+        p_local_codigo_origen:  req.local.local_codigo_origen,
+        p_tipo_facturacion_id:  req.local.tipo_facturacion_codigo,
         p_empresa_id:           req.local.empresa_codigo,
         p_pv_afip:              req.local.pv_afip,
-        p_fecha_hab:            req.local.fechaHabilitacion,
+        p_fecha_hab:            req.local.fecha_habilitacion,
         p_resultado: {type: oracledb.NUMBER, dir: oracledb.BIND_OUT, maxSize: 1000},
         p_msj: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 1000 }
       }
-      /*
+      
       let resultt = await db.executeAcc(sql,param,false)
       let response = {...resultt.outBinds}
 
       return {
         resultado: response.p_resultado,
         msj: response.p_msj,
-      }*/
+      }
 
     } catch (error) {
       return {

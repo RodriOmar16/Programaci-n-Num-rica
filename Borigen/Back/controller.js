@@ -700,13 +700,7 @@ export default {
         let peticion;
 
         if(!parametros.esPadre){
-          /*campoNoVacio(parametros.local_codigo_origen) && campoNoVacio(parametros.tipo_facturacion_id)
-          if(campoNoVacio(parametros.pv_afip)){
-            peticion = await localesGestion.getLocalesHijosEditarOracle(parametros);
-          }else{
-            peticion = await localesGestion.getLocalesHijosOracle(parametros);
-          }*/
-          peticion = await localesGestion.getLocalesHijosEditarOracle(parametros);
+          peticion = await localesGestion.getLocalesHijosOracle(parametros);
 
         } else { 
           peticion = await localesGestion.getLocalesPadresOracle(parametros);
@@ -737,81 +731,7 @@ export default {
       res.status(500).send({
         resultado: 0,
         locales: [],
-        message: 'Ocurrió un error al intentar obtener los locales Afip (getLocalesPadres): '+error.message
-      })
-    }
-  },
-  getLocalesPtoVta: async (req, res, NEXTVAL) => {
-    try {
-      let parametros = req.query;
-      if(
-        Object.keys(parametros).length == 2 &&
-        parametros.hasOwnProperty('empresa_codigo') && esNumeroEntero(parametros.empresa_codigo) && parseInt(parametros.empresa_codigo) >0 &&
-        parametros.hasOwnProperty('sucursal_codigo') && esNumeroEntero(parametros.sucursal_codigo) && parseInt(parametros.sucursal_codigo) >0
-      ){
-        console.log("parametros: ", parametros);
-        let peticion = await localesGestion.getLocalesPtoVtaOracle(parametros);
-        if(peticion.resultado == 0){
-          return res.status(500).send({
-            resultado: 0,
-            locales: [],
-            message: peticion.msj
-          });
-        }
-        res.status(200).send({
-          resultado: peticion.resultado,
-          locales: peticion.locales,
-          message: peticion.msj
-        });
-      }else{
-        res.status(400).send({
-          resultado: 0,
-          message: 'Consulta incorrecta.'
-        });
-      }
-    } catch (error) {
-      res.status(500).send({
-        resultado: 0,
-        locales: [],
-        message: 'Ocurrió un error al intentar obtener los locales Afip (getLocalesPtoVta): '+error.message
-      })
-    }
-  },
-  getLocalesPtoVtaEditar: async(req, res, next) =>{
-    try {
-      let parametros = req.query;
-      if(
-        Object.keys(parametros).length == 4 &&
-        parametros.hasOwnProperty('local_codigo') &&
-        parametros.hasOwnProperty('empresa_codigo') && esNumeroEntero(parametros.empresa_codigo) && parseInt(parametros.empresa_codigo) >0 &&
-        parametros.hasOwnProperty('sucursal_codigo') && esNumeroEntero(parametros.sucursal_codigo) && parseInt(parametros.sucursal_codigo) >0 &&
-        parametros.hasOwnProperty('tipo_facturacion')
-      ){
-        console.log("parametros: ", parametros);
-        let peticion = await localesGestion.getLocalesPtoVtaEditarOracle(parametros);
-        if(peticion.resultado == 0){
-          return res.status(500).send({
-            resultado: 0,
-            locales: [],
-            message: peticion.msj
-          });
-        }
-        res.status(200).send({
-          resultado: peticion.resultado,
-          locales: peticion.locales,
-          message: peticion.msj
-        });
-      }else{
-        res.status(400).send({
-          resultado: 0,
-          message: 'Consulta incorrecta.'
-        });
-      }
-    } catch (error) {
-      res.status(500).send({
-        resultado: 0,
-        locales: [],
-        message: 'Ocurrió un error al intentar obtener los locales Afip (getLocalesPtoVta): '+error.message
+        message: 'Ocurrió un error al intentar obtener los locales Afip (getLocalesPadresHijos): '+error.message
       })
     }
   },
@@ -820,14 +740,15 @@ export default {
       let parametros = req.body;
       if(
         Object.keys(parametros).length == 3 &&
-        parametros.hasOwnProperty('local') && Object.keys(parametros.local).length >= 6 && 
+        parametros.hasOwnProperty('local') && Object.keys(parametros.local).length >= 7 && 
         parametros.local.hasOwnProperty('empresa_codigo') && parseInt(parametros.local.empresa_codigo) > 0 &&
-        parametros.local.hasOwnProperty('fechaHabilitacion') && parametros.local.fechaHabilitacion &&
-        parametros.local.hasOwnProperty('localOrigen') && parametros.local.localOrigen.hasOwnProperty('local_acc_codigo') && parseInt(parametros.local.localOrigen.local_acc_codigo) > 0 &&
+        parametros.local.hasOwnProperty('fecha_habilitacion') && parametros.local.fecha_habilitacion &&
+        parametros.local.hasOwnProperty('local_codigo_origen') && esNumeroEntero(parametros.local.local_codigo_origen) && parseInt(parametros.local.local_codigo_origen) > 0 &&
+        parametros.local.hasOwnProperty('local_codigo') && esNumeroEntero(parametros.local.local_codigo) && parseInt(parametros.local.local_codigo) > 0 &&
         parametros.local.hasOwnProperty('pv_afip') && parametros.local.pv_afip.toString().length >= 1 &&
         parametros.local.hasOwnProperty('sucursal_codigo') && parseInt(parametros.local.sucursal_codigo) > 0 &&
-        parametros.local.hasOwnProperty('tipoFacturacion') && parseInt(parametros.local.tipoFacturacion) > 0 &&
-        parametros.hasOwnProperty('locales_asoc') && Array.isArray(parametros.locales_asoc) &&
+        parametros.local.hasOwnProperty('tipo_facturacion_codigo') && parseInt(parametros.local.tipo_facturacion_codigo) > 0 &&
+        parametros.hasOwnProperty('locales_asociados') && Array.isArray(parametros.locales_asociados) &&
         parametros.hasOwnProperty('nuevo') && (parametros.nuevo == true || parametros.nuevo == false)
       ){
         parametros.usuario = req.usuario;
@@ -859,7 +780,7 @@ export default {
       let cad = req.body.nuevo ? 'crear' : 'editar';
       res.status(500).send({
         resultado: 0,
-        message: 'Ocurrió un problema al '+cad+' el local: '+error.message
+        message: 'Ocurrió un problema al '+cad+' el local (crearEditarLocalAfip): '+error.message
       })
     }
   },

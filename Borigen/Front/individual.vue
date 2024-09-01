@@ -94,9 +94,8 @@
                   outlined
                   dense
                   clearable
-                  @change="getLocalesPadre()"
+                  @change="!nuevo && esPadre?  getLocalesHijos() : getLocalesPadres()"
                 ></v-autocomplete>
-                <!-- !nuevo && esPadre?  getLocalesHijos() : getLocalesPadres() -->
               </v-col>
               <v-col cols="12" sm="6" md="5" class="py-1">
                 Local
@@ -297,43 +296,9 @@ export default {
         this.localCopia.local_codigo        = null;
         this.localCopia.local_nombre        = null;
         this.localCopia.local_nombre_origen = null;
+        this.localCopia.localesAsociados = [];
+        this.localesHijos = [];
       }
-      this.localCopia.localesAsociados = [];
-      this.localesHijos = [];
-    },
-    validarCampos(){
-      let error = {}
-      if(!this.localCopia.empresa_codigo){
-        error.text = 'Debe seleccionar la Empresa.';
-        error.color = 'warning';
-        return error;
-      }
-      if(!this.localCopia.sucursal_codigo){
-        error.text = 'Debe seleccionar la Sucursal.';
-        error.color = 'warning';
-        return error;
-      }
-      if(!this.localCopia.tipo_facturacion){
-        error.text = 'Debe seleccionar el Tipo de Facturación.';
-        error.color = 'warning';
-        return error;
-      }
-      if(!this.localCopia.pv_afip){
-        error.text = 'Debe completar el campo Pto Vta AFIP.';
-        error.color = 'warning';
-        return error;
-      }
-      if(!this.localCopia.fecha_fabilitacion){
-        error.text = 'Debe completar el campo Fecha de Habilitación.';
-        error.color = 'warning';
-        return error;
-      }
-      if(!this.localCopia.local_codigo_origen){
-        error.text = 'Debe seleccionar un Local de Origen.';
-        error.color = 'warning';
-        return error;
-      }
-      return error;
     },
     //Editar: Inicial Hijos
     /*async getLocalesPadres(){
@@ -443,7 +408,7 @@ export default {
         order_list_by(this.localesPadres, 'local_nombre')           
       }
     },*/
-    //Nuevos/Editar: Inicial Padre
+    //Nuevos/Editar Padre
     async getLocalesHijos(){
       if(this.localCopia.empresa_codigo && this.localCopia.sucursal_codigo && 
         this.localCopia.local_codigo_origen && this.localCopia.tipo_facturacion_codigo){
@@ -453,7 +418,8 @@ export default {
           sucursal_codigo:      this.localCopia.sucursal_codigo,
           local_codigo_origen:  this.localCopia.local_codigo_origen,
           tipo_facturacion_id:  this.localCopia.tipo_facturacion_codigo,
-          pv_afip:              this.nuevo ? null : this.localCopia.pv_afip
+          pv_afip:              this.nuevo ? null : this.localCopia.pv_afip,
+          esPadre:              false, //indica que se va a traer
         };
 
         this.load1 = true;
@@ -634,6 +600,40 @@ export default {
         localesAsociados: []
       }
     },
+    validarCampos(){
+      let error = {}
+      if(!this.localCopia.empresa_codigo){
+        error.text = 'Debe seleccionar la Empresa.';
+        error.color = 'warning';
+        return error;
+      }
+      if(!this.localCopia.sucursal_codigo){
+        error.text = 'Debe seleccionar la Sucursal.';
+        error.color = 'warning';
+        return error;
+      }
+      if(!this.localCopia.tipo_facturacion){
+        error.text = 'Debe seleccionar el Tipo de Facturación.';
+        error.color = 'warning';
+        return error;
+      }
+      if(!this.localCopia.pv_afip){
+        error.text = 'Debe completar el campo Pto Vta AFIP.';
+        error.color = 'warning';
+        return error;
+      }
+      if(!this.localCopia.fecha_fabilitacion){
+        error.text = 'Debe completar el campo Fecha de Habilitación.';
+        error.color = 'warning';
+        return error;
+      }
+      if(!this.localCopia.local_codigo_origen){
+        error.text = 'Debe seleccionar un Local de Origen.';
+        error.color = 'warning';
+        return error;
+      }
+      return error;
+    },
     async guardarEmit(){
       let error = this.validarCampos();
       if(Object.keys(error).length != 0){
@@ -643,7 +643,7 @@ export default {
       this.$store.state.loading = true;
       const res = await this.$store.dispatch('localesStore/crearEditarLocalAfip',{
         local: this.localCopia,
-        locales_asoc: this.localesAsoc,
+        locales_asociados: this.localCopia.localesAsociados,
         nuevo: this.nuevo
       });
       this.$store.state.loading = false;
