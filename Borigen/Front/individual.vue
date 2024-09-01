@@ -1,4 +1,3 @@
-
 <template>
   <div>
   <v-dialog
@@ -33,7 +32,7 @@
                   :filled="!nuevo"
                   :readonly="!nuevo"
                   :clearable="nuevo"
-                  @change="getLocalesPadresHijos()"
+                  @change="getLocalesPadresNuevo()"
                 ></v-autocomplete>
               </v-col>
               <v-col cols="12" sm="6" md="4" class="py-1">
@@ -50,7 +49,7 @@
                   :filled="!nuevo"
                   :readonly="!nuevo"
                   :clearable="nuevo"
-                  @change="getLocalesPadresHijos()"
+                  @change="getLocalesPadresNuevo()"
                 ></v-autocomplete>
               </v-col>
               <v-col cols="12" sm="6" md="4" class="py-1">
@@ -79,8 +78,9 @@
                     outputMask: '####',
                     empty: null
                   }"
-                  @change="getLocalesPadresHijos()"
+                  
                 />
+                <!-- @change="getLocalesPadresHijos(2)" -->
               </v-col>
               <v-col cols="12" sm="6" md="5" class="py-1">
                 Tipo Facturación
@@ -94,8 +94,9 @@
                   outlined
                   dense
                   clearable
-                  @change="!nuevo ? (esPadre? getLocalesHijos() : getLocalesPadres() ) : getLocalesPadresHijos()"
+                  @change="getLocalesHijos()"
                 ></v-autocomplete>
+                <!-- !nuevo && esPadre?  getLocalesHijos() : getLocalesPadres() -->
               </v-col>
               <v-col cols="12" sm="6" md="5" class="py-1">
                 Local
@@ -114,7 +115,8 @@
                   @change="controlarLocal()"
                 ></v-autocomplete>-->
                 <v-text-field
-                  v-model="localCopia.local.local_nombre"
+
+                  v-model="localCopia.local_nombre"
                   outlined
                   dense
                   type="text"
@@ -126,9 +128,9 @@
               <v-col cols="12" sm="6" md="5" class="py-1">
                 Local Origen
                 <v-autocomplete
-                  v-model="localCopia.local.local_codigo_origen"
-                  item-value="local_codigo_origen"
-                  item-text="local_nombre_origen"
+                  v-model="localCopia.local_codigo_origen"
+                  item-value="local_codigo"
+                  item-text="local_nombre"
                   tabindex="1"
                   :items="localesPadres"
                   hide-details
@@ -137,8 +139,9 @@
                   :filled="!nuevo && esPadre"
                   :readonly="!nuevo && esPadre"
                   :clearable="nuevo"
-                  @change="getLocalesPadresHijos()"
+                  @change="controlarLocalOrigen(); getLocalesHijos();"
                 ></v-autocomplete>
+                <!--  -->
               <!-- :filled="!nuevo && localCopia.local_codigo == localCopia.local_codigo_origen"
                   :readonly="!nuevo && localCopia.local_codigo == localCopia.local_codigo_origen" -->
                 <!-- Local Origen 2 
@@ -171,7 +174,7 @@
               <v-col cols="12" sm="6" md="12" class="py-1" v-if="esPadre || nuevo">
                 Local Asociados
                 <v-autocomplete
-                  v-model="localCopia.local.localesAsociados"
+                  v-model="localCopia.localesAsociados"
                   item-text="local_nombre"
                   tabindex="1"
                   :items="localesHijos"
@@ -280,10 +283,20 @@ export default {
   created(){
   },
   methods:{
-    controlarLocal(){
-      if(!this.localCopia.localOrigen){
-        this.localLocal = null;
+    controlarLocalOrigen(){
+      if(this.localCopia.local_codigo_origen){
+        this.localCopia.empresa_nombre = this.localesPadres.filter(e => e.local_codigo == this.localCopia.local_codigo_origen)[0].empresa_nombre;
+        this.localCopia.local_codigo = this.localesPadres.filter(e => e.local_codigo == this.localCopia.local_codigo_origen)[0].local_codigo;
+        this.localCopia.local_nombre = this.localesPadres.filter(e => e.local_codigo == this.localCopia.local_codigo_origen)[0].local_nombre;
+        this.localCopia.local_nombre_origen = this.localesPadres.filter(e => e.local_codigo == this.localCopia.local_codigo_origen)[0].local_nombre;
+        this.localCopia.sucursal_nombre = this.localesPadres.filter(e => e.local_codigo == this.localCopia.local_codigo_origen)[0].sucursal_nombre;
+      }else{
+        this.localCopia.local_codigo        = null;
+        this.localCopia.local_nombre        = null;
+        this.localCopia.local_nombre_origen = null;
       }
+      this.localCopia.localesAsociados = [];
+      this.localesHijos = [];
     },
     validarCampos(){
       let error = {}
@@ -297,7 +310,7 @@ export default {
         error.color = 'warning';
         return error;
       }
-      if(!this.localCopia.tipoFacturacion){
+      if(!this.localCopia.tipo_facturacion){
         error.text = 'Debe seleccionar el Tipo de Facturación.';
         error.color = 'warning';
         return error;
@@ -307,64 +320,17 @@ export default {
         error.color = 'warning';
         return error;
       }
-      if(!this.localCopia.fechaHabilitacion){
+      if(!this.localCopia.fecha_fabilitacion){
         error.text = 'Debe completar el campo Fecha de Habilitación.';
         error.color = 'warning';
         return error;
       }
-      if(!this.localCopia.localOrigen  || Object.keys(this.localCopia.localOrigen).length == 0){
+      if(!this.localCopia.local_codigo_origen){
         error.text = 'Debe seleccionar un Local de Origen.';
         error.color = 'warning';
         return error;
       }
-      /*if(this.localesAsoc.length == 0){
-        error.text = 'Debe seleccionar al menos un local.';
-        error.color = 'warning';
-        return error;
-      }*/
-
       return error;
-    },
-    //Editar: Inicial Padre
-    async getLocalesHijos(){
-      let obj = {
-        empresa_codigo:       this.localCopia.empresa_codigo,
-        sucursal_codigo:      this.localCopia.sucursal_codigo,
-        local_codigo_origen:  this.localCopia.local_codigo_origen,
-        tipo_facturacion_id:  this.localCopia.tipo_facturacion_codigo,
-        pv_afip:              this.localCopia.pv_afip
-      };
-
-      this.load1 = true;
-      this.$store.state.loading = true;
-      const res = await this.$store.dispatch('localesStore/getLocalesHijosHuerfanos', obj)
-      this.$store.state.loading = false;
-      this.load1 = false;
-
-      if (res.resultado == 0){
-        return this.$store.dispatch('show_snackbar', { text: res.message, color: 'error'})
-      }
-      this.localesHijos = res.locales;
-      order_list_by(this.localesHijos, 'local_acc_nombre')
-      /*
-      {
-          empresa_codigo: 0,
-          empresa_nombre: '',
-          sucursal_codigo: 0,
-          sucursal_nombre: '',
-          fecha_habilitacion: moment(new Date()).format('DD/MM/YYYY'),
-          inhabilitado: 0,
-          local_codigo: 0,
-          local_nombre: '',
-          local_codigo_origen: 0,
-          local_nombre_origen: '',
-          pv_afip: '',
-          tipo_facturacion_codigo: 0,
-          tipo_facturacion_nombre: '',
-          localesAsociados: []
-        }
-      */
-      this.localCopia.localesAsociados = this.localesHijos.filter(e => e.local_codigo_origen == this.localCopia.local_codigo_origen);
     },
     //Editar: Inicial Hijos
     async getLocalesPadres(){
@@ -392,10 +358,59 @@ export default {
         order_list_by(this.localesPadres, 'local_nombre')
       }
     },
+    //Nuevos/Editar: Inicial Padre
+    async getLocalesHijos(){
+      if(this.localCopia.empresa_codigo && this.localCopia.sucursal_codigo && 
+        this.localCopia.local_codigo_origen && this.localCopia.tipo_facturacion_codigo){
+          console.log("emtroopoo: ");
+        let obj = {
+          empresa_codigo:       this.localCopia.empresa_codigo,
+          sucursal_codigo:      this.localCopia.sucursal_codigo,
+          local_codigo_origen:  this.localCopia.local_codigo_origen,
+          tipo_facturacion_id:  this.localCopia.tipo_facturacion_codigo,
+          pv_afip:              this.nuevo ? null : this.localCopia.pv_afip,
+        };
+
+        this.load1 = true;
+        this.$store.state.loading = true;//getLocalesHijosHuerfanos
+        const res = await this.$store.dispatch('localesStore/getLocalesPadresHijos', obj)
+        this.$store.state.loading = false;
+        this.load1 = false;
+
+        if (res.resultado == 0){
+          return this.$store.dispatch('show_snackbar', { text: res.message, color: 'error'})
+        }
+        this.localesHijos = res.locales.hijos;
+        order_list_by(this.localesHijos, 'local_nombre')
+        /*
+        {
+            empresa_codigo: 0,
+            empresa_nombre: '',
+            sucursal_codigo: 0,
+            sucursal_nombre: '',
+            fecha_habilitacion: moment(new Date()).format('DD/MM/YYYY'),
+            inhabilitado: 0,
+            local_codigo: 0,
+            local_nombre: '',
+            local_codigo_origen: 0,
+            local_nombre_origen: '',
+            pv_afip: '',
+            tipo_facturacion_codigo: 0,
+            tipo_facturacion_nombre: '',
+            localesAsociados: []
+          }
+        */
+        if(!this.nuevo) this.localCopia.localesAsociados = this.localesHijos.filter(e => e.local_codigo_origen == this.localCopia.local_codigo_origen);
+      }
+    },
     //Nuevos
-    async getLocalesPadresHijos(){
+    async getLocalesPadresNuevo(){
       this.localesHijos   = [];  //los disponibles a seleccionar
       this.localCopia.localesAsociados    = [] //hijos que se fueron agregando, los seleccionados
+      this.localesPadres  = []; //resultado de la consulta
+      this.localCopia.local_codigo_origen = null;
+      this.controlarLocalOrigen();
+
       let obj = {
         empresa_codigo:       null,
         sucursal_codigo:      null,
@@ -406,19 +421,6 @@ export default {
       if(this.localCopia.empresa_codigo && this.localCopia.sucursal_codigo){
         obj.empresa_codigo  = this.localCopia.empresa_codigo,
         obj.sucursal_codigo = this.localCopia.sucursal_codigo
-        
-        if(
-          this.localCopia.local_codigo_origen && this.localCopia.pv_afip && 
-          this.localCopia.tipo_facturacion_codigo
-        ){
-          obj.local_codigo_origen = this.localCopia.local_codigo_origen,
-          obj.pv_afip             = this.localCopia.pv_afip,
-          obj.tipo_facturacion_id = this.localCopia.tipo_facturacion_codigo
-        }else{
-          this.localesPadres  = []; //resultado de la consulta
-          this.localCopia.local_codigo_origen = null; //padre
-        }
-
         this.load1 = true;
         this.$store.state.loading = true;
         const res = await this.$store.dispatch(`localesStore/getLocalesPadresHijos`,  obj);
@@ -428,15 +430,75 @@ export default {
         if (res.resultado == 0){
           return this.$store.dispatch('show_snackbar', { text: res.message, color: 'error'})
         }
-        if(obj.local_codigo_origen && obj.pv_afip && obj.tipo_facturacion_id){
-          this.localesHijos = res.locales;
-          order_list_by(this.localesHijos, 'local_nombre')
-        }else{
-          this.localesPadres = res.locales;
-          order_list_by(this.localesPadres, 'local_nombre')
-        }
+        console.log("res: ", res);
+
+        console.log("res.locales.padres: ", res.locales.padres);
+        this.localesPadres = res.locales.padres;
+        console.log("this.localesPadres: ", this.localesPadres);
+        order_list_by(this.localesPadres, 'local_nombre')           
       }
     },
+    /*async getLocalesHijos(){
+      this.localesHijos   = [];  //los disponibles a seleccionar
+      this.localCopia.localesAsociados    = [] //hijos que se fueron agregando, los seleccionados
+      
+
+      let obj = {
+        empresa_codigo:       null,
+        sucursal_codigo:      null,
+        local_codigo_origen:  null,
+        pv_afip:              null,
+        tipo_facturacion_id:  null
+      };
+      if(this.localCopia.empresa_codigo && this.localCopia.sucursal_codigo && this.localCopia.local_codigo_origen && this.localCopia.tipo_facturacion_codigo){
+          obj.local_codigo_origen = this.localCopia.local_codigo_origen,
+          //obj.pv_afip             = this.localCopia.pv_afip,
+          obj.tipo_facturacion_id = this.localCopia.tipo_facturacion_codigo
+          obj.empresa_codigo  = this.localCopia.empresa_codigo,
+          obj.sucursal_codigo = this.localCopia.sucursal_codigo
+
+          this.load1 = true;
+            this.$store.state.loading = true;
+            const res = await this.$store.dispatch(`localesStore/getLocalesPadresHijos`,  obj);
+            this.$store.state.loading = false;
+            this.load1 = false;
+
+            if (res.resultado == 0){
+              return this.$store.dispatch('show_snackbar', { text: res.message, color: 'error'})
+            }
+            console.log("res: ", res);
+
+            if(obj.local_codigo_origen && /*obj.pv_afip && obj.tipo_facturacion_id){
+              console.log("res.locales.hijos: ", res.locales.hijos);
+              this.localesHijos = res.locales.hijos;
+              console.log("this.localesPadres: ", this.localesHijos);
+              order_list_by(this.localesHijos, 'local_nombre')
+            }            
+        }else{
+          if(this.localCopia.empresa_codigo && this.localCopia.sucursal_codigo){
+            obj.empresa_codigo  = this.localCopia.empresa_codigo,
+            obj.sucursal_codigo = this.localCopia.sucursal_codigo
+            this.load1 = true;
+            this.$store.state.loading = true;
+            const res = await this.$store.dispatch(`localesStore/getLocalesPadresHijos`,  obj);
+            this.$store.state.loading = false;
+            this.load1 = false;
+
+            if (res.resultado == 0){
+              return this.$store.dispatch('show_snackbar', { text: res.message, color: 'error'})
+            }
+            console.log("res: ", res);
+
+            console.log("res.locales.padres: ", res.locales.padres);
+              this.localesPadres = res.locales.padres;
+              console.log("this.localesPadres: ", this.localesPadres);
+              order_list_by(this.localesPadres, 'local_nombre')           
+          }
+
+        }
+
+        
+    },*/
     //Nuevos
     /*async getLocalesPtoVta(){
       this.localesPadres  = []; //resultado de la consulta
@@ -487,16 +549,34 @@ export default {
       }
     },*/
     limpiar(){
-      this.local.empresa_codigo    = null;
-      this.local.sucursal_codigo   = null;
-      this.local.tipoFacturacion   = null;
-      this.local.pv_afip           = null;
-      this.local.fechaHabilitacion = null;
-      this.local.localOrigen       = null;
-      this.local.localesAsociados  = [];
-      this.localesAsoc             = [];
-      this.locales                 = [];
-      this.localLocal              = null;
+      /*this.local.empresa_codigo             = null;
+      this.local.sucursal_codigo            = null;
+      this.local.tipo_facturacion_codigo    = null;
+      this.local.pv_afip                    = null;
+      this.local.fecha_habilitacion         = null;
+      this.local.local_codigo_origen        = null;
+      this.local.localesAsociados           = [];
+      this.localesAsoc                    = [];
+      this.locales                          = [];
+      this.localLocal                       = null;*/
+    },
+    limpiarCopia(){
+      this.localCopia = {
+        empresa_codigo: null,
+        empresa_nombre: '',
+        sucursal_codigo: null,
+        sucursal_nombre: '',
+        fecha_habilitacion: moment(new Date()).format('DD/MM/YYYY'),
+        inhabilitado: 0,
+        local_codigo: 0,
+        local_nombre: '',
+        local_codigo_origen: 0,
+        local_nombre_origen: '',
+        pv_afip: '',
+        tipo_facturacion_codigo: 0,
+        tipo_facturacion_nombre: '',
+        localesAsociados: []
+      }
     },
     async guardarEmit(){
       let error = this.validarCampos();
@@ -533,22 +613,23 @@ export default {
     activo: async function(val){
       if(val){
         this.localCopia = JSON.parse(JSON.stringify(this.local));
-        /*if(!this.localCopia.fechaHabilitacion){
-          this.localCopia.fechaHabilitacion = moment(new Date()).format('DD/MM/YYYY')
+        if(!this.localCopia.fecha_habilitacion){
+          this.localCopia.fecha_habilitacion = moment(new Date()).format('DD/MM/YYYY')
         }else{
-          this.localCopia.fechaHabilitacion = moment(this.localCopia.fechaHabilitacion).format('DD/MM/YYYY')
-        }*/
-        if(!this.nuevo){
           this.localCopia.fecha_habilitacion = moment(this.localCopia.fecha_habilitacion).format('DD/MM/YYYY')
+        }
+        if(!this.nuevo){
           //this.objLocal.local_acc_codigo  = this.localCopia.localOrigen.local_codigo_origen;
           //this.objLocal.sucursal_codigo   = this.localCopia.sucursal_codigo;
           this.esPadre = this.localCopia.local_codigo == this.localCopia.local_codigo_origen;
           if(this.localCopia.localesAsociados.length != 0 || this.esPadre ){
             //es un padre
             await this.getLocalesHijos();
+            console.log("es padre");
           }else{
             //es un hijo
-            await this.getLocalesPadres();
+            console.log("es hijo");
+            //await this.getLocalesPadres();
           }
         }
       }else{
