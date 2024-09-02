@@ -1664,7 +1664,12 @@ export default{
         END;
         `       
       }else{
-
+        /*para editar un local hijo: 
+        - el hijo puede cambiar de padre: en este caso la tupla se inhabilita(se lo desvincula de ese padre)
+        - se actualiza el padre de la tupla
+        
+        
+        */
       }
 
       let param = {
