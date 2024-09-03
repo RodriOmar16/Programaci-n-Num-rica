@@ -699,13 +699,15 @@ export default {
         console.log("parametros: ", parametros);
         let peticion;
 
-        if(!parametros.esPadre){
+        if(campoNoVacio(parametros.esPadre) && !parametros.esPadre){
           peticion = await localesGestion.getLocalesHijosOracle(parametros);
+          return console.log("entro es hijo");
 
         } else { 
           peticion = await localesGestion.getLocalesPadresOracle(parametros);
+          //return console.log("entro es padre");
         }
-
+        console.log("peticion: ", peticion);
         if(peticion.resultado == 0){
           return res.status(500).send({
             resultado: 0,
@@ -716,7 +718,7 @@ export default {
         res.status(200).send({
           resultado: peticion.resultado,
           locales: {
-            padres: peticion.padres,
+            //padres: peticion.padres,
             hijos:  peticion.hijos
           },
           message: peticion.msj
@@ -732,6 +734,100 @@ export default {
         resultado: 0,
         locales: [],
         message: 'Ocurrió un error al intentar obtener los locales Afip (getLocalesPadresHijos): '+error.message
+      })
+    }
+  },
+  getLocalesPadres: async(req, res, next) => {
+    try {
+      let parametros = req.query;
+      if(
+        Object.keys(parametros).length == 7 &&
+        parametros.hasOwnProperty('empresa_codigo') && esNumeroEntero(parametros.empresa_codigo) && parseInt(parametros.empresa_codigo) >0 &&
+        parametros.hasOwnProperty('sucursal_codigo') && esNumeroEntero(parametros.sucursal_codigo) && parseInt(parametros.sucursal_codigo) >0 &&
+        parametros.hasOwnProperty('local_codigo_origen') && parametros.hasOwnProperty('pv_afip') && parametros.hasOwnProperty('tipo_facturacion_id') &&
+        parametros.hasOwnProperty('esPadre') && parametros.hasOwnProperty('nuevo')
+      ){
+        console.log("padres -- parametros: ", parametros);
+        if(parametros.nuevo == 'true'){
+          parametros.nuevo = true;
+        }else parametros.nuevo = false;
+        let peticion;
+        peticion = await localesGestion.getLocalesPadresOracle(parametros);
+        //return console.log("entro es padre");
+
+        console.log("peticion: ", peticion);
+        if(peticion.resultado == 0){
+          return res.status(500).send({
+            resultado: 0,
+            locales: [],
+            message: peticion.msj
+          });
+        }
+        res.status(200).send({
+          resultado: peticion.resultado,
+          locales: {
+            padres: peticion.padres,
+            //hijos:  peticion.hijos
+          },
+          message: peticion.msj
+        });
+      }else{
+        res.status(400).send({
+          resultado: 0,
+          message: 'Consulta incorrecta.'
+        });
+      }
+    } catch (error) {
+      res.status(500).send({
+        resultado: 0,
+        locales: [],
+        message: 'Ocurrió un error al intentar obtener los locales Afip (getLocalesPadres): '+error.message
+      })
+    }
+  },
+  getLocalesHijos: async(req, res, next) => {
+    try {
+      let parametros = req.query;
+      if(
+        Object.keys(parametros).length == 6 &&
+        parametros.hasOwnProperty('empresa_codigo') && esNumeroEntero(parametros.empresa_codigo) && parseInt(parametros.empresa_codigo) >0 &&
+        parametros.hasOwnProperty('sucursal_codigo') && esNumeroEntero(parametros.sucursal_codigo) && parseInt(parametros.sucursal_codigo) >0 &&
+        parametros.hasOwnProperty('local_codigo_origen') && parametros.hasOwnProperty('pv_afip') && parametros.hasOwnProperty('tipo_facturacion_id') &&
+        parametros.hasOwnProperty('esPadre')
+      ){
+        console.log("parametros: ", parametros);
+        let peticion;
+        peticion = await localesGestion.getLocalesHijosOracle(parametros);
+        console.log("entro es hijo");
+        //return console.log("entro es padre");
+
+        console.log("peticion: ", peticion);
+        if(peticion.resultado == 0){
+          return res.status(500).send({
+            resultado: 0,
+            locales: [],
+            message: peticion.msj
+          });
+        }
+        res.status(200).send({
+          resultado: peticion.resultado,
+          locales: {
+            //padres: peticion.padres,
+            hijos:  peticion.hijos
+          },
+          message: peticion.msj
+        });
+      }else{
+        res.status(400).send({
+          resultado: 0,
+          message: 'Consulta incorrecta.'
+        });
+      }
+    } catch (error) {
+      res.status(500).send({
+        resultado: 0,
+        locales: [],
+        message: 'Ocurrió un error al intentar obtener los locales Afip (getLocalesHijos): '+error.message
       })
     }
   },

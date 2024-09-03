@@ -451,7 +451,7 @@ export default {
     async getLocalesPadresHijos({}, datos){
       return await new Promise(async (resolve, reject) => {
         try{
-          let localesPeticion = await fetch(`${config.BASE_URL}/locales/getLocalesPadresHijos?empresa_codigo=${datos.empresa_codigo}&sucursal_codigo=${datos.sucursal_codigo}&local_codigo_origen=${datos.local_codigo_origen}&pv_afip=${datos.pv_afip}&tipo_facturacion_id=${datos.tipo_facturacion_id},&esPadre=${datos.esPadre}`, {
+          let localesPeticion = await fetch(`${config.BASE_URL}/locales/getLocalesPadresHijos?empresa_codigo=${datos.empresa_codigo}&sucursal_codigo=${datos.sucursal_codigo}&local_codigo_origen=${datos.local_codigo_origen}&pv_afip=${datos.pv_afip}&tipo_facturacion_id=${datos.tipo_facturacion_id}&esPadre=${datos.esPadre}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -469,12 +469,9 @@ export default {
       })
     },
     async getLocalesPadres({}, datos){
-
-    },
-    async getLocalesHijosHuerfanos({}, datos){
       return await new Promise(async (resolve, reject) => {
         try{
-          let localesPeticion = await fetch(`${config.BASE_URL}/locales/getLocalesHijosHuerfanos?empresa_codigo=${datos.empresa_codigo}&sucursal_codigo=${datos.sucursal_codigo}&local_codigo_origen=${datos.local_codigo_origen}&pv_afip=${datos.pv_afip}&tipo_facturacion_id=${datos.tipo_facturacion_id}&nuevo=${datos.nuevo}`, {
+          let localesPeticion = await fetch(`${config.BASE_URL}/locales/getLocalesPadres?empresa_codigo=${datos.empresa_codigo}&sucursal_codigo=${datos.sucursal_codigo}&local_codigo_origen=${datos.local_codigo_origen}&pv_afip=${datos.pv_afip}&tipo_facturacion_id=${datos.tipo_facturacion_id}&esPadre=${datos.esPadre}&nuevo=${datos.nuevo}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -486,15 +483,15 @@ export default {
         }catch(error){
           return resolve({
             resultado: 0,
-            msj: 'Ocurrio un problema al ejecutar el metodo getLocalesHijosHuerfanos: ' + error.message
+            msj: 'Ocurrio un problema al ejecutar el metodo getLocalesPadres: ' + error.message
           })
         }
       })
     },
-    /*async getLocalesPtoVta({}, datos){
+    async getLocalesHijos({}, datos){
       return await new Promise(async (resolve, reject) => {
         try{
-          let localesPeticion = await fetch(`${config.BASE_URL}/locales/getLocalesPtoVta?empresa_codigo=${datos.empresa_codigo}&sucursal_codigo=${datos.sucursal_codigo}`, {
+          let localesPeticion = await fetch(`${config.BASE_URL}/locales/getLocalesHijos?empresa_codigo=${datos.empresa_codigo}&sucursal_codigo=${datos.sucursal_codigo}&local_codigo_origen=${datos.local_codigo_origen}&pv_afip=${datos.pv_afip}&tipo_facturacion_id=${datos.tipo_facturacion_id}&esPadre=${datos.esPadre}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -506,50 +503,7 @@ export default {
         }catch(error){
           return resolve({
             resultado: 0,
-            msj: 'Ocurrio un problema al ejecutar el metodo getLocalesPtoVta: ' + error.message
-          })
-        }
-      })
-    },
-    async getLocalesHuerfanos({}, datos){
-      return await new Promise(async (resolve, reject) => {
-        try{
-          let localesPeticion = await fetch(`${config.BASE_URL}/locales/getLocalesHuerfanos?
-            empresa_codigo=${datos.empresa_codigo}&sucursal_codigo=${datos.sucursal_codigo}&
-            pv_afip=${datos.pv_afip}&tipo_facturacion_id=${datos.tipo_facturacion_id}&
-            local_codigo_origen=${datos.local_codigo_origen}`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': store.state.long_token
-            }
-          })
-          let locales = await localesPeticion.json()
-          return resolve(locales)
-        }catch(error){
-          return resolve({
-            resultado: 0,
-            msj: 'Ocurrio un problema al ejecutar el metodo getLocalesHuerfanos: ' + error.message
-          })
-        }
-      })
-    },*/
-    async getLocalesPtoVtaEditar({}, datos){
-      return await new Promise(async (resolve, reject) => {
-        try{
-          let localesPeticion = await fetch(`${config.BASE_URL}/locales/getLocalesPtoVtaEditar?empresa_codigo=${datos.empresa_codigo}&sucursal_codigo=${datos.sucursal_codigo}&local_codigo=${datos.local_codigo}&tipo_facturacion=${datos.tipo_facturacion}`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': store.state.long_token
-            }
-          })
-          let locales = await localesPeticion.json()
-          return resolve(locales)
-        }catch(error){
-          return resolve({
-            resultado: 0,
-            msj: 'Ocurrio un problema al ejecutar el metodo getLocalesPtoVtaEditar: ' + error.message
+            msj: 'Ocurrio un problema al ejecutar el metodo getLocalesHijos: ' + error.message
           })
         }
       })

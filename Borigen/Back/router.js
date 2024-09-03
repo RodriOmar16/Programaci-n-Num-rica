@@ -23,6 +23,8 @@ router.get('/terminalesIntegradas', auth.logginUser, locales.getTerminalesIntegr
 //afip
 router.get('/initFormLocalesAfip', auth.logginUser, locales.initFormLocalesAfip)
 router.get('/getLocalesPadresHijos', auth.logginUser, locales.getLocalesPadresHijos)
+router.get('/getLocalesPadres', auth.logginUser, locales.getLocalesPadres)
+router.get('/getLocalesHijos', auth.logginUser, locales.getLocalesHijos)
 router.get('/getLocalesAfip', auth.logginUser, locales.getLocalesAfip)
 router.post('/crearEditarLocalAfip', auth.logginUser, locales.crearEditarLocalAfip)
 router.post('/inhabilitarLocalesAfip', auth.logginUser, locales.inhabilitarLocalesAfip)

@@ -157,7 +157,7 @@
             {{ item.fecha_habilitacion ? moment(item.fecha_habilitacion).format('DD/MM/YYYY') : ''}}
           </template>
           <template v-slot:[`item.acciones`]="{ item }">
-            <v-tooltip bottom>
+            <v-tooltip bottom v-if="item.inhabilitado==0">
               <template v-slot:activator="{ on }">
                 <v-btn small icon color="warning" @click="open_window(item)" v-on="on" >
                   <v-icon small>fas fa-pen</v-icon>
@@ -320,23 +320,6 @@ export default {
       };
       this.search = '';
     },
-    /*asociarLocales(item){
-      console.log("item: ", item);
-      if(item.local_codigo == item.local_codigo_origen){
-        this.localUno         = {};
-        this.localOrigen      = item 
-        this.localesAsociados = this.localesAfip.filter(e => e.local_codigo != item.local_codigo && e.local_codigo_origen == item.local_codigo_origen && e.empresa_codigo == item.empresa_codigo && e.pv_afip == item.pv_afip);
-        if(this.localesAsociados.length == 0){
-          this.localesAsociados = this.localesAfip.filter(e => e.local_codigo == item.local_codigo_origen && e.pv_afip == item.pv_afip && e.empresa_codigo == item.empresa_codigo);
-        }
-      }else{
-        this.localOrigen      = this.localesAfip.filter(e => e.local_codigo == item.local_codigo_origen && e.pv_afip == item.pv_afip && e.empresa_codigo == item.empresa_codigo)[0];
-        this.localesAsociados = [];//this.localesAfip.filter(e => e.local_codigo == item.local_codigo);
-        this.localUno         = item;
-      }
-      console.log("this.localOrigen: ", this.localOrigen);
-      console.log("localesAsociados: ", this.localesAsociados);
-    },*/
     detAsociados(item){
       if(item.local_codigo == item.local_codigo_origen){
         this.localesAsociados = this.localesAfip.filter(e => 
@@ -347,32 +330,10 @@ export default {
             e.pv_afip == item.pv_afip
           )
         );
-        /*if(this.localesAsociados.length == 0){
-          this.localesAsociados = this.localesAfip.filter(e => e.local_codigo == item.local_codigo_origen && e.pv_afip == item.pv_afip && e.empresa_codigo == item.empresa_codigo);
-        }*/
+        
       }else this.localesAsociados = [];
-      //console.log("localesAsociados: ", this.localesAsociados);
     },
     async open_window(item){
-      /*if(item){
-        this.asociarLocales(item);
-        this.objModal.nuevo = false;
-        this.objModal.local = {
-          empresa_codigo:     item.empresa_codigo,
-          pv_afip:            item.pv_afip,
-          tipoFacturacion:    item.tipo_facturacion_codigo,
-          sucursal_codigo:    item.sucursal_codigo,
-          fechaHabilitacion:  item.fecha_habilitacion,
-          localOrigen:        this.localOrigen,
-          localesAsociados:   this.localesAsociados,
-          local:              this.localUno,
-        };
-      }else{
-        this.objModal.nuevo = true;
-      }
-      this.objModal.tiposFacturacion = this.tiposFacturacion;
-      this.objModal.activo = true;*/
-      //console.log("item: ", item);
       if(!item){
         this.objModal.nuevo = true;
         this.objModal.local = {
@@ -431,11 +392,19 @@ export default {
         return this.$store.dispatch('show_snackbar', { text: res.message, color: 'error' });
       }
       this.$store.dispatch('show_snackbar', { text: cad2, color: 'success' });
-
-      let pos = this.localesAfip.map(e => e.local_codigo).indexOf(item.local_codigo);
-      if(pos != -1){
-        this.localesAfip[pos].inhabilitado = 1;
-      }
+      
+      if(item.local_codigo == item.local_codigo_origen){
+        this.localesAfip.forEach(e => {
+          if(e.local_codigo_origen = item.local_codigo_origen){
+            e.inhabilitado = 1;
+          }
+        })
+      }else{
+        let pos = this.localesAfip.map(e => e.local_codigo).indexOf(item.local_codigo);
+        if(pos != -1){
+          this.localesAfip[pos].inhabilitado = 1;
+        }
+      }     
     },
     async habilitarPtoVenta(item){
       let nombre = item.local_nombre;
@@ -466,16 +435,16 @@ export default {
     },
     guardarGrabar(local, nuevo){
       console.log("EMIT __ local: ", local);
-      if(nuevo){
+      //if(nuevo){
         this.limpiar();
         this.filtro.pv_afip = local.pv_afip;
         this.buscar();
-      }else{
+      //}else{
         /*let pos = this.localesAfip.map(e => e.local_acc_codigo).indexOf(local.localOrigen.local_acc_codigo);
         if(pos != -1){
 
         }*/
-      }
+      //}
 
     },
   },
