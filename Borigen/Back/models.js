@@ -1572,8 +1572,62 @@ export default{
         /*para editar un local hijo: 
         - el hijo puede cambiar de padre: en este caso la tupla se inhabilita(se lo desvincula de ese padre SIEMPRE EXISTE)
         - se inserta un nuevo registro con el padre y el hijo       
-        
         */
+       sql = '';
+       sql += `
+        DECLARE
+          V_ERROR EXCEPTION;
+          V_CONT  NUMBER;
+          V_MSJ   VARCHAR2(4000);
+        BEGIN
+          IF :p_local_codigo_origen <> :p_local_codigo_origen_viejo THEN 
+          -- dejo como inahbilitado el padre anterior  
+          BEGIN
+              UPDATE GESTION.LOCALES_PV LP
+              SET INHABILITADO = 1
+              WHERE NVL(LP.INHABILITADO,0) = 0
+                AND LP.LOCAL_CODIGO_ORIGEN = :p_local_codigo_origen_viejo
+                AND LP.LOCAL_CODIGO        = :p_local_codigo
+                AND LP.CODIGO_EMISION      = :p_pv_afip
+                AND LP.TIPO_FACTURACION_ID = :p_tipo_facturacion_id
+                AND LP.EMPRESA_ID          = :p_empresa_id;
+            EXCEPTION
+             WHEN OTHERS THEN
+              V_MSJ := 'Ocurrió un problema al intentar actualizar el estado al local padre anterior: '|| substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
+              RAISE V_ERROR;
+            END;
+            IF SQL%ROWCOUNT = 0 OR SQL%ROWCOUNT > 1 THEN
+                V_MSJ := 'Se actualizó más de un local padre en el sistema. Revisar.';
+                RAISE V_ERROR;
+            END IF;
+
+            -- inserto un nuevo registro con los datos del nuevo padre
+            BEGIN
+              INSERT INTO GESTION.LOCALES_PV(LOCAL_CODIGO, PV_CODIGO, CODIGO_EMISION, FECHA_HABILITACION, INHABILITADO, TIPO_FACTURACION_ID, EMPRESA_ID, LOCAL_CODIGO_ORIGEN)
+              VALUES(:p_local_codigo, '001', :p_pv_afip, :p_fecha_hab, NULL, :p_tipo_facturacion_id, :p_empresa_id: p_local_codigo_origen)
+            EXCEPTION
+              WHEN OTHERS THEN
+                V_MSJ := 'Ocurrió un problema al cambiar el local origen del Local: ' || substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
+                RAISE V_ERROR;
+            IF SQL%ROWCOUNT = 0 OR SQL%ROWCOUNT > 1 THEN
+                V_MSJ := 'Ocurrió un problema, se agregó más de un registro en el sistema. Revisar.';
+                RAISE V_ERROR;
+            END IF;    
+
+          END IF;
+          :p_msj       := 'Ok.'
+          :p_resultado := 1;
+        EXCEPTION
+            WHEN V_ERROR THEN
+                ROLLBACK;
+                :p_msj       := V_MSJ;
+                :p_resultado := 0;
+            WHEN OTHERS THEN
+                ROLLBACK;
+                :p_msj       := 'Ocurrió un error general al editar el local AFIP hijo: ' || substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
+                :p_resultado := 0;
+        END;
+       `;
       }
 
       console.log("sql: ", sql);
