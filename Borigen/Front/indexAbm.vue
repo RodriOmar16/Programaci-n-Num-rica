@@ -395,7 +395,10 @@ export default {
       
       if(item.local_codigo == item.local_codigo_origen){
         this.localesAfip.forEach(e => {
-          if(e.local_codigo_origen = item.local_codigo_origen){
+          if(e.local_codigo_origen = item.local_codigo_origen &&
+             e.tipo_facturacion == item.tipo_facturacion &&
+             e.empresa_id == item.empresa_id &&
+             e.pv_afip == item.pv_afip){
             e.inhabilitado = 1;
           }
         })

@@ -1453,9 +1453,6 @@ export default{
               cursor += ' UNION ALL '
             }
           }
-          
-          //let cadAsociados = this.req.locales_asoc.map(e => e.local_acc_codigo).join(', ');
-
           sqlAsociados += `
             BEGIN
               -- De los que vienen si 1 o algunos están en base, inserto los que no estén en locales_pv
