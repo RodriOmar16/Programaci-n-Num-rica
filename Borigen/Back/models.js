@@ -1501,11 +1501,7 @@ export default{
                     V_MSJ := 'Ocurrió un problema general al intentar agregar el local asociado: ' || substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
                     RAISE V_ERROR;
             END;
-            /*IF SQL%ROWCOUNT = 0 THEN
-                V_MSJ := 'No se agregó ningún registro en el sistema. Revisar.';
-                RAISE V_ERROR;
-            END IF;*/
-
+            
             -- se inhabilitan para ese local_codigo_origen los que no vengan
             BEGIN 
               UPDATE GESTION.LOCALES_PV LP
@@ -1543,7 +1539,7 @@ export default{
           BEGIN 
             UPDATE GESTION.LOCALES_PV LP
             SET LP.INHABILITADO = 1
-            WHERE LP.TIPO_FACTURACION_ID  = :p_tipo_facturacion_id
+            WHERE LP.TIPO_FACTURACION_ID  = :p_tipo_facturacion_id_viejo --:p_tipo_facturacion_id
               AND LP.EMPRESA_ID           = :p_empresa_id
               AND LP.LOCAL_CODIGO_ORIGEN  = :p_local_codigo_origen
               AND LP.CODIGO_EMISION       = :p_pv_afip
@@ -1555,6 +1551,94 @@ export default{
               RAISE V_ERROR;
           END;`
       }
+
+      let sqlNuevoTF = `OPEN PTOS_VTA_ELECT;
+          FETCH PTOS_VTA_ELECT INTO PTOS_DET;
+          WHILE PTOS_VTA_ELECT%FOUND
+          LOOP
+              BEGIN
+                UPDATE GESTION.LOCALES_PV LP
+                SET LP.INHABILITADO = 1
+                WHERE NVL(LP.INHABILITADO, 0) = 0
+                  AND LP.LOCAL_CODIGO = PTOS_DET.LOCAL_CODIGO
+                  AND LP.CODIGO_EMISION = PTOS_DET.CODIGO_EMISION
+                  AND LP.TIPO_FACTURACION_ID = PTOS_DET.TIPO_FACTURACION_ID
+                  AND LP.EMPRESA_ID = PTOS_DET.EMPRESA_ID
+                  AND NVL(LP.LOCAL_CODIGO_ORIGEN, 0) = PTOS_DET.LOCAL_CODIGO_ORIGEN;
+                
+                -- primero controlo que los que vengan de la web, si ya tiene un registro en base inhabilitado -> los habilitado en vez de volver a agregar
+                SELECT COUNT(*) INTO V_CONT
+                FROM GESTION.LOCALES_PV LP
+                WHERE NVL(LP.INHABILITADO, 0) = 1
+                  AND LP.LOCAL_CODIGO_ORIGEN = PTOS_DET.LOCAL_CODIGO_ORIGEN
+                  AND LP.LOCAL_CODIGO        = PTOS_DET.LOCAL_CODIGO
+                  AND LP.CODIGO_EMISION      = PTOS_DET.CODIGO_EMISION
+                  AND LP.EMPRESA_ID          = PTOS_DET.EMPRESA_ID
+                  AND LP.TIPO_FACTURACION_ID = :p_tipo_facturacion_id_viejo;
+                IF NVL(V_CONT,0) > 0 THEN 
+                  BEGIN
+                    UPDATE GESTION.LOCALES_PV LP
+                    SET INHABILITADO = NULL
+                    WHERE NVL(LP.INHABILITADO, 0) = 1
+                      AND LP.LOCAL_CODIGO_ORIGEN    = :p_local_codigo_origen
+                      AND LP.CODIGO_EMISION         = :p_pv_afip
+                      AND LP.EMPRESA_ID             = :p_empresa_id
+                      AND LP.TIPO_FACTURACION_ID    = :p_tipo_facturacion_id;
+                  EXCEPTION
+                    WHEN OTHERS THEN
+                      V_MSJ := 'Ocurrió un problema al actualizar el local: ' || substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
+                  END;
+                END IF;
+                
+                -- inserto los que no estén en locales_pv
+                BEGIN
+                  INSERT INTO GESTION.LOCALES_PV(LOCAL_CODIGO, PV_CODIGO, CODIGO_EMISION, FECHA_HABILITACION, INHABILITADO, TIPO_FACTURACION_ID, EMPRESA_ID, LOCAL_CODIGO_ORIGEN)
+                  SELECT T.LOCAL_CODIGO, '001' PV_CODIGO, T.CODIGO_EMISION, TRUNC(SYSDATE) FECHA_HABILITACION ,NULL INHABILITADO, T.TIPO_FACTURACION_ID, T.EMPRESA_ID, T.LOCAL_CODIGO_ORIGEN
+                  FROM (${cursor}) T
+                  WHERE T.LOCAL_CODIGO NOT IN(
+                                              SELECT LP.LOCAL_CODIGO
+                                              FROM LOCALES_PV LP
+                                              WHERE LP.TIPO_FACTURACION_ID  = :p_tipo_facturacion_id
+                                                AND LP.EMPRESA_ID           = :p_empresa_id
+                                                AND LP.LOCAL_CODIGO_ORIGEN  = :p_local_codigo_origen
+                                                AND LP.CODIGO_EMISION       = :p_pv_afip
+                                                AND NVL(LP.INHABILITADO, 0) = 0
+                                                AND LP.LOCAL_CODIGO_ORIGEN  <> LP.LOCAL_CODIGO
+                                              );
+                EXCEPTION
+                    WHEN OTHERS THEN
+                        V_MSJ := 'Ocurrió un problema general al intentar agregar el local asociado: ' || substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
+                        RAISE V_ERROR;
+                END;
+                
+                -- se inhabilitan para ese local_codigo_origen los que no vengan
+                BEGIN 
+                  UPDATE GESTION.LOCALES_PV LP
+                  SET LP.INHABILITADO = 1
+                  WHERE LP.TIPO_FACTURACION_ID  = :p_tipo_facturacion_id
+                    AND LP.EMPRESA_ID           = :p_empresa_id
+                    AND LP.LOCAL_CODIGO_ORIGEN  = :p_local_codigo_origen
+                    AND LP.CODIGO_EMISION       = :p_pv_afip
+                    AND NVL(LP.INHABILITADO, 0) = 0
+                    AND LP.LOCAL_CODIGO_ORIGEN  <> LP.LOCAL_CODIGO
+                    AND LP.LOCAL_CODIGO NOT IN (
+                                                  SELECT DISTINCT T.LOCAL_CODIGO
+                                                  FROM (${cursor}) T
+                                                );
+
+              EXCEPTION
+                  WHEN OTHERS THEN
+                      V_MSJ := 'Ocurrió un problema general al intentar inhabiliar el local: ' || substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
+                      RAISE V_ERROR;
+              END;
+              IF SQL%ROWCOUNT = 0 OR SQL%ROWCOUNT > 1 THEN
+                  V_MSJ := 'Se actualizó más de un registro en el sistema. Revisar.';
+                  RAISE V_ERROR;
+              END IF;
+              -- SIGUIENTE REGISTRO
+              FETCH PTOS_VTA_ELECT INTO PTOS_DET;
+          END LOOP;
+          CLOSE PTOS_VTA_ELECT;`
 
       sql += `
         DECLARE
@@ -1595,9 +1679,22 @@ export default{
             END IF;
           END IF;         
 
-          -- inserto nuevos asociados de la web que no estén en la base 
-          -- deshabilito los viejos que no vengan de la web
-          ${sqlAsociados}  
+          IF :p_tipo_facturacion_id = :p_tipo_facturacion_id_viejo THEN
+            -- inserto nuevos asociados de la web que no estén en la base  -- deshabilito los viejos que no vengan de la web
+            ${sqlAsociados}
+          ELSE
+            DECLARE
+              CURSOR PTOS_VTA_ELECT IS
+                ${sqlCursor};
+              PTOS_DET PTOS_VTA_ELECT%ROWTYPE;
+            BEGIN
+              ${sqlNuevoTF}
+            EXCEPTION
+              WHEN OTHERS THEN
+                V_MSJ := 'Ocurrió' || substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
+                RAISE V_ERROR;
+            END;
+          END IF;
 
           COMMIT;
           :p_msj       := 'Ok.';
