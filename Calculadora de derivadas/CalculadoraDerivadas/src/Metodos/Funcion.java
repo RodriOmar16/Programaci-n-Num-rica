@@ -47,4 +47,17 @@ public class Funcion {
         
     }
     
+    public double evaluar2(double nro){
+        jep = new JEP();
+        
+        this.jep.addStandardFunctions();
+        this.jep.addStandardConstants();
+        this.jep.addVariable("x", nro);
+        this.jep.parseExpression(this.funcion);
+        this.resultado = this.jep.getValue();
+        this.error = (this.jep.hasError())? "Existe un error.":"No hay error.";
+        
+        return this.resultado;
+    }
+    
 }

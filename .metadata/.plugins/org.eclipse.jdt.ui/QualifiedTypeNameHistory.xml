@@ -4,10 +4,10 @@
     <fullyQualifiedTypeName name="funciones.Funcion"/>
     <fullyQualifiedTypeName name="calculadora.Derivadas"/>
     <fullyQualifiedTypeName name="org.nfunk.jep.JEP"/>
-    <fullyQualifiedTypeName name="Metodos.Funcion"/>
     <fullyQualifiedTypeName name="java.lang.Math"/>
     <fullyQualifiedTypeName name="java.util.NoSuchElementException"/>
     <fullyQualifiedTypeName name="Matriz"/>
     <fullyQualifiedTypeName name="java.lang.System"/>
     <fullyQualifiedTypeName name="java.util.Scanner"/>
+    <fullyQualifiedTypeName name="Metodos.Funcion"/>
 </qualifiedTypeNameHistroy>
