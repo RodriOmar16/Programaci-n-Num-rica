@@ -1013,7 +1013,9 @@ export default{
     try {
       let listado = [];
             //´
-      let sqlPadres = `
+      let sqlPadres = '';
+      if(req.esPadre){
+        sqlPadres =  `
         -- busco los padres disponibles, aquellos habilitados que están en LOCALES y no están en LOCALES_PV(excluir también aquellos que tiene el local_codigo_origen = null)
         SELECT 
             EMP.CODIGO              EMPRESA_CODIGO,  
@@ -1030,37 +1032,8 @@ export default{
             NULL                    TIPO_FACTURACION_CODIGO,
             NULL                    TIPO_FACTURACION_NOMBRE
         FROM GESTION.LOCALES L,
-             TELECOM.SUCURSALES@TELECOM.SERVERORAC.CBB.NET   SUC,
-             TELECOM.EMPRESAS@TELECOM.SERVERORAC.CBB.NET     EMP
-        WHERE NVL(L.INHABILITADO,0) = 0
-          AND L.SUCURSAL_CODIGO     = SUC.CODIGO
-          AND SUC.CODIGO            = ${req.sucursal_codigo}
-          AND L.EMPRESA_CODIGO      = EMP.CODIGO
-          AND EMP.CODIGO            = ${req.empresa_codigo}
-          AND NOT EXISTS (SELECT 1 FROM GESTION.LOCALES_PV LP
-                          WHERE LP.LOCAL_CODIGO         = L.CODIGO
-                            AND NVL(LP.INHABILITADO,0)  = 0
-                            AND LP.EMPRESA_ID           = ${req.empresa_codigo})
-        `;
-      if(campoNoVacio(req.tipo_facturacion_id)){
-        sqlPadres += ` UNION ALL 
-        SELECT 
-            EMP.CODIGO              EMPRESA_CODIGO,  
-            EMP.NOMBRE              EMPRESA_NOMBRE,
-            SUC.CODIGO              SUCURSAL_CODIGO,
-            SUC.NOMBRE              SUCURSAL_NOMBRE,
-            NULL                    FECHA_HABILITACION,
-            NVL(L.INHABILITADO, 0) INHABILITADO,
-            L.CODIGO               LOCAL_CODIGO,
-            L.NOMBRE               LOCAL_NOMBRE,
-            L.CODIGO               LOCAL_CODIGO_ORIGEN,
-            L.NOMBRE               LOCAL_CODIGO_NOMBRE,
-            NULL                    PV_AFIP,
-            NULL                    TIPO_FACTURACION_CODIGO,
-            NULL                    TIPO_FACTURACION_NOMBRE
-        FROM GESTION.LOCALES L,
-             TELECOM.SUCURSALES@TELECOM.SERVERORAC.CBB.NET   SUC,
-             TELECOM.EMPRESAS@TELECOM.SERVERORAC.CBB.NET     EMP
+            TELECOM.SUCURSALES@TELECOM.SERVERORAC.CBB.NET   SUC,
+            TELECOM.EMPRESAS@TELECOM.SERVERORAC.CBB.NET     EMP
         WHERE NVL(L.INHABILITADO,0) = 0
           AND L.SUCURSAL_CODIGO     = SUC.CODIGO
           AND SUC.CODIGO            = ${req.sucursal_codigo}
@@ -1070,29 +1043,32 @@ export default{
                           WHERE LP.LOCAL_CODIGO         = L.CODIGO
                             AND NVL(LP.INHABILITADO,0)  = 0
                             AND LP.EMPRESA_ID           = ${req.empresa_codigo}
-                            AND LP.TIPO_FACTURACION_ID  = ${req.tipo_facturacion_id})`
+          ${campoNoVacio(req.tipo_facturacion_id) ? `AND LP.TIPO_FACTURACION_ID  = ${req.tipo_facturacion_id}` : ``})`;
       }
 
-      if(!req.nuevo && campoNoVacio(req.local_codigo_origen)){
-        sqlPadres += ` UNION ALL 
+      if(campoNoVacio(req.local_codigo_origen)){
+        if(sqlPadres.length > 0){
+          sqlPadres += ' UNION ALL ';
+        }
+        sqlPadres += ` -- para cuando se abre el modal, el local padre de los datos del hijo
         SELECT DISTINCT
             EMP.CODIGO              EMPRESA_CODIGO,  
             EMP.NOMBRE              EMPRESA_NOMBRE,
             SUC.CODIGO              SUCURSAL_CODIGO,
             SUC.NOMBRE              SUCURSAL_NOMBRE,
             NULL                    FECHA_HABILITACION,
-            NVL(L.INHABILITADO, 0) INHABILITADO,
-            L.CODIGO               LOCAL_CODIGO,
-            L.NOMBRE               LOCAL_NOMBRE,
-            L.CODIGO               LOCAL_CODIGO_ORIGEN,
-            L.NOMBRE               LOCAL_CODIGO_NOMBRE,
-            NULL                    PV_AFIP,
+            NVL(L.INHABILITADO, 0)  INHABILITADO,
+            L.CODIGO                LOCAL_CODIGO,
+            L.NOMBRE                LOCAL_NOMBRE,
+            L.CODIGO                LOCAL_CODIGO_ORIGEN,
+            L.NOMBRE                LOCAL_CODIGO_NOMBRE,
+            LP.CODIGO_EMISION       PV_AFIP,
             NULL                    TIPO_FACTURACION_CODIGO,
             NULL                    TIPO_FACTURACION_NOMBRE
         FROM GESTION.LOCALES L,
-             GESTION.LOCALES_PV LP,
-             TELECOM.SUCURSALES@TELECOM.SERVERORAC.CBB.NET   SUC,
-             TELECOM.EMPRESAS@TELECOM.SERVERORAC.CBB.NET     EMP
+              GESTION.LOCALES_PV LP,
+              TELECOM.SUCURSALES@TELECOM.SERVERORAC.CBB.NET   SUC,
+              TELECOM.EMPRESAS@TELECOM.SERVERORAC.CBB.NET     EMP
         WHERE NVL(L.INHABILITADO,0)   = 0
           AND L.CODIGO                = LP.LOCAL_CODIGO_ORIGEN
           AND LP.LOCAL_CODIGO_ORIGEN  = LP.LOCAL_CODIGO
@@ -1102,7 +1078,36 @@ export default{
           AND SUC.CODIGO              = ${req.sucursal_codigo}
           AND L.EMPRESA_CODIGO        = EMP.CODIGO
           AND EMP.CODIGO              = ${req.empresa_codigo}`
-      }else console.log("NO ENTROOOOOOO");
+      }
+      sqlPadres += ` UNION ALL 
+        -- para cuando se abre el modal, el local padre de los datos del hijo
+        SELECT DISTINCT
+            EMP.CODIGO              EMPRESA_CODIGO,  
+            EMP.NOMBRE              EMPRESA_NOMBRE,
+            SUC.CODIGO              SUCURSAL_CODIGO,
+            SUC.NOMBRE              SUCURSAL_NOMBRE,
+            NULL                    FECHA_HABILITACION,
+            NVL(L.INHABILITADO, 0)  INHABILITADO,
+            L.CODIGO                LOCAL_CODIGO,
+            L.NOMBRE                LOCAL_NOMBRE,
+            L.CODIGO                LOCAL_CODIGO_ORIGEN,
+            L.NOMBRE                LOCAL_CODIGO_NOMBRE,
+            LP.CODIGO_EMISION       PV_AFIP,
+            NULL                    TIPO_FACTURACION_CODIGO,
+            NULL                    TIPO_FACTURACION_NOMBRE
+        FROM GESTION.LOCALES L,
+              GESTION.LOCALES_PV LP,
+              TELECOM.SUCURSALES@TELECOM.SERVERORAC.CBB.NET   SUC,
+              TELECOM.EMPRESAS@TELECOM.SERVERORAC.CBB.NET     EMP
+        WHERE NVL(L.INHABILITADO,0)   = 0
+          AND L.CODIGO                = LP.LOCAL_CODIGO_ORIGEN
+          AND LP.LOCAL_CODIGO_ORIGEN  = LP.LOCAL_CODIGO
+          AND LP.TIPO_FACTURACION_ID  = ${req.tipo_facturacion_id}
+          AND L.SUCURSAL_CODIGO       = SUC.CODIGO
+          AND SUC.CODIGO              = ${req.sucursal_codigo}
+          AND L.EMPRESA_CODIGO        = EMP.CODIGO
+          AND EMP.CODIGO              = ${req.empresa_codigo}`
+      //}
 
       //console.log("sql: ",sql);
       console.log("sqlPadres: ",sqlPadres);
@@ -1429,58 +1434,80 @@ export default{
       }
     }
   },
-  editarLocalAfipOracle: async(req, res, next) =>{
-    console.log("req: ", req);
+  editarLocalAfipPadreOracle: async(req, res, next) =>{
+    console.log("editarLocalAfipPadreOracle -- req: ", req);
     try {
       let sql = '';
-      //estoy editando al padre ?
-      if(req.local.local_codigo_origen == req.local.local_codigo){
-        let sqlNoAsociados = ``;
-        let sqlAsociados = '';
+      let sqlAsociados = '';
 
-        if(req.locales_asociados.length > 0){
-          let n = req.locales_asociados.length;
-          let cursor = '';
-          for(let i=0; i<n ;i++){
-            cursor += `SELECT :p_pv_afip CODIGO_EMISION,
-                              :p_tipo_facturacion_id TIPO_FACTURACION_ID,
-                              ${req.locales_asociados[i].local_codigo} LOCAL_CODIGO,
-                              :p_local_codigo_origen LOCAL_CODIGO_ORIGEN,
-                              :p_empresa_id EMPRESA_ID
-                      FROM DUAL
-            `
-            if(i != (n-1)){
-              cursor += ' UNION ALL '
-            }
+      if(req.locales_asociados.length > 0){
+        let n = req.locales_asociados.length;
+        let cursor = '';
+        for(let i=0; i<n ;i++){
+          cursor += `SELECT :p_pv_afip CODIGO_EMISION,
+                            :p_tipo_facturacion_id TIPO_FACTURACION_ID,
+                            ${req.locales_asociados[i].local_codigo} LOCAL_CODIGO,
+                            :p_local_codigo_origen LOCAL_CODIGO_ORIGEN,
+                            :p_empresa_id EMPRESA_ID
+                    FROM DUAL
+          `
+          if(i != (n-1)){
+            cursor += ' UNION ALL '
           }
-          sqlAsociados += `
-            BEGIN
-              -- De los que vienen si 1 o algunos están en base, inserto los que no estén en locales_pv
-                BEGIN
-                  INSERT INTO GESTION.LOCALES_PV(LOCAL_CODIGO, PV_CODIGO, CODIGO_EMISION, FECHA_HABILITACION, INHABILITADO, TIPO_FACTURACION_ID, EMPRESA_ID, LOCAL_CODIGO_ORIGEN)
-                  SELECT T.LOCAL_CODIGO, '001' PV_CODIGO, T.CODIGO_EMISION, TRUNC(SYSDATE) FECHA_HABILITACION ,NULL INHABILITADO, T.TIPO_FACTURACION_ID, T.EMPRESA_ID, T.LOCAL_CODIGO_ORIGEN
-                  FROM (${cursor}) T
-                  WHERE T.LOCAL_CODIGO NOT IN(
-                                              SELECT LP.LOCAL_CODIGO
-                                              FROM LOCALES_PV LP
-                                              WHERE LP.TIPO_FACTURACION_ID  = :p_tipo_facturacion_id
-                                                AND LP.EMPRESA_ID           = :p_empresa_id
-                                                AND LP.LOCAL_CODIGO_ORIGEN  = :p_local_codigo_origen
-                                                AND LP.CODIGO_EMISION       = :p_pv_afip
-                                                AND NVL(LP.INHABILITADO, 0) = 0
-                                                AND LP.LOCAL_CODIGO_ORIGEN  <> LP.LOCAL_CODIGO
-                                              );
-                EXCEPTION
-                    WHEN OTHERS THEN
-                        V_MSJ := 'Ocurrió un problema general al intentar agregar el local asociado: ' || substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
-                        RAISE V_ERROR;
-                END;
-                IF SQL%ROWCOUNT = 0 THEN
-                    V_MSJ := 'No se agregó ningún registro en el sistema. Revisar.';
-                    RAISE V_ERROR;
-                END IF;
+        }
 
-              -- se inhabilitan para ese local_codigo_origen los que no vengan
+        sqlAsociados += `
+          BEGIN
+            -- primero controlo que los que vengan de la web, si ya tiene un registro en base inhabilitado -> los habilitado en vez de volver a agregar
+            SELECT COUNT(*) INTO V_CONT
+            FROM GESTION.LOCALES_PV LP
+            WHERE NVL(LP.INHABILITADO, 0) = 1
+              AND LP.LOCAL_CODIGO_ORIGEN = :p_local_codigo_origen
+              AND LP.CODIGO_EMISION      = :p_pv_afip
+              AND LP.EMPRESA_ID          = :p_empresa_id
+              AND LP.TIPO_FACTURACION_ID = :p_tipo_facturacion_id;
+            IF NVL(V_CONT,0) > 0 THEN 
+              BEGIN
+                UPDATE GESTION.LOCALES_PV LP
+                SET INHABILITADO = NULL
+                WHERE NVL(LP.INHABILITADO, 0) = 1
+                  AND LP.LOCAL_CODIGO_ORIGEN    = :p_local_codigo_origen
+                  AND LP.CODIGO_EMISION         = :p_pv_afip
+                  AND LP.EMPRESA_ID             = :p_empresa_id
+                  AND LP.TIPO_FACTURACION_ID    = :p_tipo_facturacion_id;
+              EXCEPTION
+                WHEN OTHERS THEN
+                  V_MSJ := 'Ocurrió un problema al actualizar el local: ' || substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
+              END;
+            END IF;
+            
+            -- inserto los que no estén en locales_pv
+            BEGIN
+              INSERT INTO GESTION.LOCALES_PV(LOCAL_CODIGO, PV_CODIGO, CODIGO_EMISION, FECHA_HABILITACION, INHABILITADO, TIPO_FACTURACION_ID, EMPRESA_ID, LOCAL_CODIGO_ORIGEN)
+              SELECT T.LOCAL_CODIGO, '001' PV_CODIGO, T.CODIGO_EMISION, TRUNC(SYSDATE) FECHA_HABILITACION ,NULL INHABILITADO, T.TIPO_FACTURACION_ID, T.EMPRESA_ID, T.LOCAL_CODIGO_ORIGEN
+              FROM (${cursor}) T
+              WHERE T.LOCAL_CODIGO NOT IN(
+                                          SELECT LP.LOCAL_CODIGO
+                                          FROM LOCALES_PV LP
+                                          WHERE LP.TIPO_FACTURACION_ID  = :p_tipo_facturacion_id
+                                            AND LP.EMPRESA_ID           = :p_empresa_id
+                                            AND LP.LOCAL_CODIGO_ORIGEN  = :p_local_codigo_origen
+                                            AND LP.CODIGO_EMISION       = :p_pv_afip
+                                            AND NVL(LP.INHABILITADO, 0) = 0
+                                            AND LP.LOCAL_CODIGO_ORIGEN  <> LP.LOCAL_CODIGO
+                                          );
+            EXCEPTION
+                WHEN OTHERS THEN
+                    V_MSJ := 'Ocurrió un problema general al intentar agregar el local asociado: ' || substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
+                    RAISE V_ERROR;
+            END;
+            /*IF SQL%ROWCOUNT = 0 THEN
+                V_MSJ := 'No se agregó ningún registro en el sistema. Revisar.';
+                RAISE V_ERROR;
+            END IF;*/
+
+            -- se inhabilitan para ese local_codigo_origen los que no vengan
+            BEGIN 
               UPDATE GESTION.LOCALES_PV LP
               SET LP.INHABILITADO = 1
               WHERE LP.TIPO_FACTURACION_ID  = :p_tipo_facturacion_id
@@ -1494,39 +1521,58 @@ export default{
                                               FROM (${cursor}) T
                                             );
             EXCEPTION
-              WHEN OTHERS THEN
-                V_MSJ := 'Ocurrió un problema general al editar los locales asociados: ' || substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
-                RAISE V_ERROR;
+                WHEN OTHERS THEN
+                    V_MSJ := 'Ocurrió un problema general al intentar quitar los locales asociados: ' || substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
+                    RAISE V_ERROR;
             END;
-          `
-          
-
-        }else{
-          //quito todos los que tenía asociado
-          sqlAsociados=`
-            BEGIN 
-              UPDATE GESTION.LOCALES_PV LP
-              SET LP.INHABILITADO = 1
-              WHERE LP.TIPO_FACTURACION_ID  = :p_tipo_facturacion_id
-                AND LP.EMPRESA_ID           = :p_empresa_id
-                AND LP.LOCAL_CODIGO_ORIGEN  = :p_local_codigo_origen
-                AND LP.CODIGO_EMISION       = :p_pv_afip
-                AND NVL(LP.INHABILITADO, 0) = 0
-                AND LP.LOCAL_CODIGO_ORIGEN  <> LP.LOCAL_CODIGO;                 
-            EXCEPTION
-              WHEN OTHERS THEN
-                V_MSJ := 'Ocurrió un problema al intentar desasociar los locales al local origen: ' || substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
+            IF SQL%ROWCOUNT > 1 THEN
+                V_MSJ := 'Se actualizó más de un registro. Revisar.';
                 RAISE V_ERROR;
-            END;
-          `
-        }
+            END IF;
 
-        sql += `
+          EXCEPTION
+            WHEN V_ERROR THEN 
+              RAISE V_ERROR;
+            WHEN OTHERS THEN
+              V_MSJ := 'Ocurrió un problema general al editar los locales asociados: ' || substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
+              RAISE V_ERROR;
+          END;`
+      }else{
+        //quito todos los que tenía asociado
+        sqlAsociados=`
+          BEGIN 
+            UPDATE GESTION.LOCALES_PV LP
+            SET LP.INHABILITADO = 1
+            WHERE LP.TIPO_FACTURACION_ID  = :p_tipo_facturacion_id
+              AND LP.EMPRESA_ID           = :p_empresa_id
+              AND LP.LOCAL_CODIGO_ORIGEN  = :p_local_codigo_origen
+              AND LP.CODIGO_EMISION       = :p_pv_afip
+              AND NVL(LP.INHABILITADO, 0) = 0
+              AND LP.LOCAL_CODIGO_ORIGEN  <> LP.LOCAL_CODIGO;                 
+          EXCEPTION
+            WHEN OTHERS THEN
+              V_MSJ := 'Ocurrió un problema al intentar desasociar los locales al local origen: ' || substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
+              RAISE V_ERROR;
+          END;`
+      }
+
+      sql += `
         DECLARE
-            V_ERROR EXCEPTION;
-            V_MSJ   VARCHAR2(4000);
-            V_CONT  NUMBER;
+          V_ERROR EXCEPTION;
+          V_CONT  NUMBER;
+          V_MSJ   VARCHAR2(4000);
         BEGIN
+          -- consulto si el padre para ese nuevo tipo de facturacion ya existe en la base
+          SELECT COUNT(*) INTO V_CONT
+          FROM GESTION.LOCALES_PV LP
+          WHERE NVL(LP.INHABILITADO ,0)  = 0
+            AND LP.LOCAL_CODIGO          = :p_local_codigo_origen
+            AND LP.LOCAL_CODIGO_ORIGEN   = :p_local_codigo_origen
+            AND LP.EMPRESA_ID            = :p_empresa_id
+            AND LP.TIPO_FACTURACION_ID   = :p_tipo_facturacion_id
+            AND LP.CODIGO_EMISION        = :p_pv_afip
+            AND LP.LOCAL_CODIGO_ORIGEN   = LP.LOCAL_CODIGO;
+          IF  NVL(V_CONT,0) = 0 THEN
             -- actualizo los datos del padre
             BEGIN
                 UPDATE GESTION.LOCALES_PV LP
@@ -1535,7 +1581,7 @@ export default{
                 WHERE LP.LOCAL_CODIGO          = :p_local_codigo_origen
                   AND LP.LOCAL_CODIGO_ORIGEN   = :p_local_codigo_origen
                   AND LP.EMPRESA_ID            = :p_empresa_id
-                  AND LP.TIPO_FACTURACION_ID   = :p_tipo_facturacion_id
+                  AND LP.TIPO_FACTURACION_ID   = :p_tipo_facturacion_id_viejo
                   AND LP.CODIGO_EMISION        = :p_pv_afip
                   AND LP.LOCAL_CODIGO_ORIGEN   = LP.LOCAL_CODIGO;
             EXCEPTION
@@ -1547,16 +1593,15 @@ export default{
                 V_MSJ := 'Se actualizó más de un local padre en el sistema. Revisar.';
                 RAISE V_ERROR;
             END IF;
+          END IF;         
 
-            -- inserto nuevos asociados de la web que no estén en la base 
-            -- deshabilito los viejos que no vengan de la web
-            ${sqlAsociados}
+          -- inserto nuevos asociados de la web que no estén en la base 
+          -- deshabilito los viejos que no vengan de la web
+          ${sqlAsociados}  
 
-            -- exito
-            COMMIT;
-            :p_resultado  := 1;
-            :p_msj        := 'Ok';
-
+          COMMIT;
+          :p_msj       := 'Ok.';
+          :p_resultado := 1;
         EXCEPTION
             WHEN V_ERROR THEN
                 ROLLBACK;
@@ -1567,56 +1612,124 @@ export default{
                 :p_msj       := 'Ocurrió un error general al editar el local AFIP: ' || substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
                 :p_resultado := 0;
         END;
-        `       
-      }else{
-        /*para editar un local hijo: 
+       `;
+
+      console.log("sql: ", sql);
+
+      let param = {
+        //p_local_codigo:         req.local.local_codigo,
+        p_local_codigo_origen:        req.local.padre.local_codigo_origen,
+        p_tipo_facturacion_id_viejo:  req.local.anterior.tipo_facturacion_codigo,
+        p_tipo_facturacion_id:        req.local.padre.tipo_facturacion_codigo,
+        p_empresa_id:                 req.local.padre.empresa_codigo,
+        p_pv_afip:                    req.local.padre.pv_afip,
+        //p_fecha_hab_viejo:            req.local.anterior.fecha_habilitacion,
+        p_fecha_hab:                  req.local.padre.fecha_habilitacion,
+        p_resultado: {type: oracledb.NUMBER, dir: oracledb.BIND_OUT, maxSize: 1000},
+        p_msj: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 1000 }
+      }
+      console.log("param: ", param);
+      let resultt = await db.executeAcc(sql,param,false)
+      let response = {...resultt.outBinds}
+
+      return {
+        resultado: response.p_resultado,
+        msj: response.p_msj,
+      }
+
+    } catch (error) {
+      return {
+        resultado: 0,
+        msj: 'Ocurrió un error al editar el local AFIP (editarLocalAfipPadreOracle): ' + error.message
+      }
+    }
+  },
+  editarLocalAfipHijoOracle: async(req, res, next) =>{
+    console.log("req: ", req);
+    try {
+      let sql = '';
+
+      /*para editar un local hijo: 
         - el hijo puede cambiar de padre: en este caso la tupla se inhabilita(se lo desvincula de ese padre SIEMPRE EXISTE)
         - se inserta un nuevo registro con el padre y el hijo       
         */
-       sql = '';
-       sql += `
+      sql += `
         DECLARE
           V_ERROR EXCEPTION;
           V_CONT  NUMBER;
           V_MSJ   VARCHAR2(4000);
         BEGIN
-          IF :p_local_codigo_origen <> :p_local_codigo_origen_viejo THEN 
-          -- dejo como inahbilitado el padre anterior  
-          BEGIN
-              UPDATE GESTION.LOCALES_PV LP
-              SET INHABILITADO = 1
-              WHERE NVL(LP.INHABILITADO,0) = 0
-                AND LP.LOCAL_CODIGO_ORIGEN = :p_local_codigo_origen_viejo
-                AND LP.LOCAL_CODIGO        = :p_local_codigo
-                AND LP.CODIGO_EMISION      = :p_pv_afip
-                AND LP.TIPO_FACTURACION_ID = :p_tipo_facturacion_id
-                AND LP.EMPRESA_ID          = :p_empresa_id;
-            EXCEPTION
-             WHEN OTHERS THEN
-              V_MSJ := 'Ocurrió un problema al intentar actualizar el estado al local padre anterior: '|| substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
-              RAISE V_ERROR;
-            END;
-            IF SQL%ROWCOUNT = 0 OR SQL%ROWCOUNT > 1 THEN
-                V_MSJ := 'Se actualizó más de un local padre en el sistema. Revisar.';
-                RAISE V_ERROR;
+            IF :p_local_codigo_origen <> :p_local_codigo_origen_viejo THEN 
+                  -- dejo como inahbilitado el padre anterior  
+                BEGIN
+                    UPDATE GESTION.LOCALES_PV LP
+                    SET INHABILITADO = 1
+                    WHERE NVL(LP.INHABILITADO,0) = 0
+                      AND LP.LOCAL_CODIGO_ORIGEN = :p_local_codigo_origen_viejo
+                      AND LP.LOCAL_CODIGO        = :p_local_codigo
+                      AND LP.CODIGO_EMISION      = :p_pv_afip_viejo
+                      AND LP.TIPO_FACTURACION_ID = :p_tipo_facturacion_id_viejo
+                      AND LP.EMPRESA_ID          = :p_empresa_id;
+                EXCEPTION
+                    WHEN OTHERS THEN
+                        V_MSJ := 'Ocurrió un problema al intentar actualizar el estado al local padre anterior: '|| substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
+                        RAISE V_ERROR;
+                END;
+                IF SQL%ROWCOUNT = 0 OR SQL%ROWCOUNT > 1 THEN
+                    V_MSJ := 'Se actualizó más de un local padre en el sistema. Revisar.';
+                    RAISE V_ERROR;
+                END IF;
+
+                -- controlo que si ya hay uno en base pero inhabilitado (se cambio de padre y se volvió al anterior) actualizo en vez de volver a insertar
+                SELECT COUNT(*) INTO V_CONT
+                FROM GESTION.LOCALES_PV LP
+                WHERE NVL(LP.INHABILITADO,0) = 1
+                  AND LP.LOCAL_CODIGO        = :p_local_codigo
+                  AND LP.LOCAL_CODIGO_ORIGEN = :p_local_codigo_origen
+                  AND LP.CODIGO_EMISION      = :p_pv_afip
+                  AND LP.TIPO_FACTURACION_ID = :p_tipo_facturacion_id
+                  AND LP.EMPRESA_ID          = :p_empresa_id; 
+                
+                IF NVL(V_CONT ,0) = 0 THEN
+                  -- inserto un nuevo registro con los datos del nuevo padre
+                  BEGIN
+                      INSERT INTO GESTION.LOCALES_PV(LOCAL_CODIGO, PV_CODIGO, CODIGO_EMISION, FECHA_HABILITACION, INHABILITADO, TIPO_FACTURACION_ID, EMPRESA_ID, LOCAL_CODIGO_ORIGEN)
+                                              VALUES(:p_local_codigo, '001', :p_pv_afip, TO_DATE(:p_fecha_hab, 'DD/MM/YYYY'), NULL, :p_tipo_facturacion_id, :p_empresa_id, :p_local_codigo_origen);
+                  EXCEPTION
+                      WHEN OTHERS THEN
+                          V_MSJ := 'Ocurrió un problema al cambiar el local origen del Local: ' || substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
+                          RAISE V_ERROR;
+                  END;
+                  IF SQL%ROWCOUNT = 0 OR SQL%ROWCOUNT > 1 THEN
+                      V_MSJ := 'Ocurrió un problema, se agregó más de un registro en el sistema. Revisar.';
+                      RAISE V_ERROR;
+                  END IF;
+                ELSE
+                  -- actualizo el registro que ya existe pero está inhabilitado si es necesario
+                  BEGIN
+                      UPDATE GESTION.LOCALES_PV LP
+                      SET INHABILITADO = NULL
+                      WHERE NVL(LP.INHABILITADO,0) = 1
+                        AND LP.LOCAL_CODIGO        = :p_local_codigo
+                        AND LP.LOCAL_CODIGO_ORIGEN = :p_local_codigo_origen
+                        AND LP.CODIGO_EMISION      = :p_pv_afip
+                        AND LP.TIPO_FACTURACION_ID = :p_tipo_facturacion_id
+                        AND LP.EMPRESA_ID          = :p_empresa_id; 
+                  EXCEPTION
+                      WHEN OTHERS THEN
+                          V_MSJ := 'Ocurrió un problema al cambiar el local origen del Local: ' || substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
+                          RAISE V_ERROR;
+                  END;
+                  IF SQL%ROWCOUNT = 0 OR SQL%ROWCOUNT > 1 THEN
+                      V_MSJ := 'Ocurrió un problema, se cambiar el local origen. Revisar.';
+                      RAISE V_ERROR;
+                  END IF;
+                END IF;
+                
             END IF;
-
-            -- inserto un nuevo registro con los datos del nuevo padre
-            BEGIN
-              INSERT INTO GESTION.LOCALES_PV(LOCAL_CODIGO, PV_CODIGO, CODIGO_EMISION, FECHA_HABILITACION, INHABILITADO, TIPO_FACTURACION_ID, EMPRESA_ID, LOCAL_CODIGO_ORIGEN)
-              VALUES(:p_local_codigo, '001', :p_pv_afip, :p_fecha_hab, NULL, :p_tipo_facturacion_id, :p_empresa_id: p_local_codigo_origen)
-            EXCEPTION
-              WHEN OTHERS THEN
-                V_MSJ := 'Ocurrió un problema al cambiar el local origen del Local: ' || substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
-                RAISE V_ERROR;
-            IF SQL%ROWCOUNT = 0 OR SQL%ROWCOUNT > 1 THEN
-                V_MSJ := 'Ocurrió un problema, se agregó más de un registro en el sistema. Revisar.';
-                RAISE V_ERROR;
-            END IF;    
-
-          END IF;
-          :p_msj       := 'Ok.'
-          :p_resultado := 1;
+            COMMIT;
+            :p_msj       := 'Ok.';
+            :p_resultado := 1;
         EXCEPTION
             WHEN V_ERROR THEN
                 ROLLBACK;
@@ -1624,24 +1737,26 @@ export default{
                 :p_resultado := 0;
             WHEN OTHERS THEN
                 ROLLBACK;
-                :p_msj       := 'Ocurrió un error general al editar el local AFIP hijo: ' || substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
+                :p_msj       := 'Ocurrió un error general al editar el local AFIP: ' || substr(SQLERRM||'-'||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE(),0,4000);
                 :p_resultado := 0;
-        END;
-       `;
-      }
+        END;`;
 
       console.log("sql: ", sql);
 
       let param = {
-        //p_local_codigo:         req.local.local_codigo,
-        p_local_codigo_origen:  req.local.local_codigo_origen,
-        p_tipo_facturacion_id:  req.local.tipo_facturacion_codigo,
-        p_empresa_id:           req.local.empresa_codigo,
-        p_pv_afip:              req.local.pv_afip,
-        p_fecha_hab:            req.local.fecha_habilitacion,
+        p_local_codigo:               req.local.hijo.local_codigo,
+        p_local_codigo_origen_viejo:  req.local.hijo.local_codigo_origen,
+        p_local_codigo_origen:        req.local.padre.local_codigo_origen,
+        p_tipo_facturacion_id_viejo:  req.local.hijo.tipo_facturacion_codigo,
+        p_tipo_facturacion_id:        req.local.padre.tipo_facturacion_codigo,
+        p_empresa_id:                 req.local.padre.empresa_codigo,
+        p_pv_afip_viejo:              req.local.hijo.pv_afip,
+        p_pv_afip:                    req.local.padre.pv_afip,
+        p_fecha_hab:                  req.local.padre.fecha_habilitacion,
         p_resultado: {type: oracledb.NUMBER, dir: oracledb.BIND_OUT, maxSize: 1000},
         p_msj: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 1000 }
       }
+      console.log("param: ", param);
       
       let resultt = await db.executeAcc(sql,param,false)
       let response = {...resultt.outBinds}
@@ -1654,7 +1769,7 @@ export default{
     } catch (error) {
       return {
         resultado: 0,
-        msj: 'Ocurrió un error al editar el local AFIP (editarLocalAfipOracle): ' + error.message
+        msj: 'Ocurrió un error al editar el local AFIP (editarLocalAfipHijoOracle): ' + error.message
       }
     }
   },

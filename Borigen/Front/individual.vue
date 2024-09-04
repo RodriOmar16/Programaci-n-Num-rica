@@ -69,9 +69,9 @@
                     clearable: true,
                     outlined: true,
                     dense: true,
-                    filled:!nuevo,
-                    readonly:!nuevo,
-                    clearable: nuevo,
+                    filled: !nuevo,
+                    readonly: !nuevo,
+                    clearable: !nuevo,
                   }"
                   v-bind:options="{
                     inputMask: '####',
@@ -100,7 +100,7 @@
               <v-col cols="12" sm="6" md="5" class="py-1" v-if="!esPadre && !nuevo">
                 Local
                 <v-text-field
-                  v-model="localCopia.local_nombre"
+                  v-model="localCopiaHijo.local_nombre"
                   outlined
                   dense
                   type="text"
@@ -123,7 +123,7 @@
                   :filled="!nuevo && esPadre"
                   :readonly="!nuevo && esPadre"
                   :clearable="nuevo"
-                  @change=" getLocalesHijos(); controlarLocalOrigen();"
+                  @change=" getLocalesHijos(); controlarLocalOrigen(); "
                 ></v-autocomplete>
               </v-col>
               <v-col cols="12" sm="6" md="12" class="py-1" v-if="esPadre">
@@ -220,6 +220,8 @@ export default {
   data(){
     return{
       localCopia: {},
+      localCopiaHijo: {},
+      localCopiaPadre: {},
       locales:[],
       //localesAsoc: [],
       localesPadres: [],
@@ -271,7 +273,7 @@ export default {
         local_codigo_origen:  null,
         pv_afip:              null,
         tipo_facturacion_id:  null,
-        esPadre:              true,
+        esPadre:              this.esPadre,
         nuevo:                this.nuevo
       };
       if(this.localCopia.empresa_codigo && this.localCopia.sucursal_codigo){
@@ -304,53 +306,55 @@ export default {
     },
     //Nuevos/Editar Padre
     async getLocalesHijos(){
-      if(this.localCopia.empresa_codigo && this.localCopia.sucursal_codigo && 
-        this.localCopia.local_codigo_origen && this.localCopia.tipo_facturacion_codigo){
-          console.log("entrooooo getLocalesHijos: ");
-        let obj = {
-          empresa_codigo:       this.localCopia.empresa_codigo,
-          sucursal_codigo:      this.localCopia.sucursal_codigo,
-          local_codigo_origen:  this.localCopia.local_codigo_origen,
-          tipo_facturacion_id:  this.localCopia.tipo_facturacion_codigo,
-          pv_afip:              this.nuevo ? null : this.localCopia.pv_afip,
-          esPadre:              false, //indica que se va a traer
-        };
-        console.log("obj: ", obj);
-        this.load1 = true;
-        this.$store.state.loading = true;
-        const res = await this.$store.dispatch('localesStore/getLocalesHijos', obj)
-        this.$store.state.loading = false;
-        this.load1 = false;
+      if(this.esPadre){
+        if(this.localCopia.empresa_codigo && this.localCopia.sucursal_codigo && 
+          this.localCopia.local_codigo_origen && this.localCopia.tipo_facturacion_codigo){
+            console.log("entrooooo getLocalesHijos: ");
+          let obj = {
+            empresa_codigo:       this.localCopia.empresa_codigo,
+            sucursal_codigo:      this.localCopia.sucursal_codigo,
+            local_codigo_origen:  this.localCopia.local_codigo_origen,
+            tipo_facturacion_id:  this.localCopia.tipo_facturacion_codigo,
+            pv_afip:              this.nuevo ? null : this.localCopia.pv_afip,
+            esPadre:              false, //indica que se va a traer
+          };
+          console.log("obj: ", obj);
+          this.load1 = true;
+          this.$store.state.loading = true;
+          const res = await this.$store.dispatch('localesStore/getLocalesHijos', obj)
+          this.$store.state.loading = false;
+          this.load1 = false;
 
-        if (res.resultado == 0){
-          return this.$store.dispatch('show_snackbar', { text: res.message, color: 'error'})
-        }
-        console.log("localHijos: ", this.localesHijos);
-        console.log("res: ", res);
-        this.localesHijos = res.locales.hijos;
-        order_list_by(this.localesHijos, 'local_nombre')
-        if(this.nuevo){
-          this.localesHijos = this.localesHijos.filter(e => e.local_codigo_origen != obj.local_codigo_origen);
-        }
-        /*
-        {
-            empresa_codigo: 0,
-            empresa_nombre: '',
-            sucursal_codigo: 0,
-            sucursal_nombre: '',
-            fecha_habilitacion: moment(new Date()).format('DD/MM/YYYY'),
-            inhabilitado: 0,
-            local_codigo: 0,
-            local_nombre: '',
-            local_codigo_origen: 0,
-            local_nombre_origen: '',
-            pv_afip: '',
-            tipo_facturacion_codigo: 0,
-            tipo_facturacion_nombre: '',
-            localesAsociados: []
+          if (res.resultado == 0){
+            return this.$store.dispatch('show_snackbar', { text: res.message, color: 'error'})
           }
-        */
-        if(!this.nuevo) this.localCopia.localesAsociados = this.localesHijos.filter(e => e.local_codigo_origen == this.localCopia.local_codigo_origen && e.tipo == 2);
+          console.log("localHijos: ", this.localesHijos);
+          console.log("res: ", res);
+          this.localesHijos = res.locales.hijos;
+          order_list_by(this.localesHijos, 'local_nombre')
+          if(this.nuevo){
+            this.localesHijos = this.localesHijos.filter(e => e.local_codigo_origen != obj.local_codigo_origen);
+          }
+          /*
+          {
+              empresa_codigo: 0,
+              empresa_nombre: '',
+              sucursal_codigo: 0,
+              sucursal_nombre: '',
+              fecha_habilitacion: moment(new Date()).format('DD/MM/YYYY'),
+              inhabilitado: 0,
+              local_codigo: 0,
+              local_nombre: '',
+              local_codigo_origen: 0,
+              local_nombre_origen: '',
+              pv_afip: '',
+              tipo_facturacion_codigo: 0,
+              tipo_facturacion_nombre: '',
+              localesAsociados: []
+            }
+          */
+          if(!this.nuevo) this.localCopia.localesAsociados = this.localesHijos.filter(e => e.local_codigo_origen == this.localCopia.local_codigo_origen && e.tipo == 2);
+        }
       }
     },
     limpiar(){
@@ -428,13 +432,31 @@ export default {
       if(Object.keys(error).length != 0){
         return this.$store.dispatch('show_snackbar', error)
       }
+
+      let obj = {
+        local:              this.localCopia,
+        locales_asociados:  this.localCopia.localesAsociados,
+        nuevo:              this.nuevo,
+        es_padre:           this.esPadre
+      };
+      if(!this.nuevo){
+        if(!this.esPadre){
+          obj.local = {
+            padre:  this.localCopia,
+            hijo:   this.localCopiaHijo
+          }
+        }else{
+          obj.local = {
+            padre:    this.localCopia,
+            anterior: this.localCopiaPadre
+          }
+        }
+      }
+      
+
       this.load = true;
       this.$store.state.loading = true;
-      const res = await this.$store.dispatch('localesStore/crearEditarLocalAfip',{
-        local: this.localCopia,
-        locales_asociados: this.localCopia.localesAsociados,
-        nuevo: this.nuevo
-      });
+      const res = await this.$store.dispatch('localesStore/crearEditarLocalAfip',obj);
       this.$store.state.loading = false;
       this.load = false;
       console.log("res: ", res);
@@ -467,10 +489,12 @@ export default {
           this.esPadre = this.localCopia.local_codigo == this.localCopia.local_codigo_origen;
           if(this.localCopia.localesAsociados.length != 0 || this.esPadre ){
             //es un padre
+            this.localCopiaPadre = JSON.parse(JSON.stringify(this.localCopia));
             this.localesPadres.push(this.localCopia);
             await this.getLocalesHijos();
             console.log("es padre");
           }else{
+            this.localCopiaHijo = JSON.parse(JSON.stringify(this.localCopia));
             //es un hijo
             console.log("es hijo");
             await this.getLocalesPadre();

@@ -22,7 +22,7 @@ router.post('/eliminarTerminal', auth.logginUser, locales.eliminarTerminal)
 router.get('/terminalesIntegradas', auth.logginUser, locales.getTerminalesIntegradas)
 //afip
 router.get('/initFormLocalesAfip', auth.logginUser, locales.initFormLocalesAfip)
-router.get('/getLocalesPadresHijos', auth.logginUser, locales.getLocalesPadresHijos)
+//router.get('/getLocalesPadresHijos', auth.logginUser, locales.getLocalesPadresHijos)
 router.get('/getLocalesPadres', auth.logginUser, locales.getLocalesPadres)
 router.get('/getLocalesHijos', auth.logginUser, locales.getLocalesHijos)
 router.get('/getLocalesAfip', auth.logginUser, locales.getLocalesAfip)

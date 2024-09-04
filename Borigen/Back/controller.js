@@ -686,7 +686,7 @@ export default {
       })
     }
   },
-  getLocalesPadresHijos: async(req, res, next) => {
+  /*getLocalesPadresHijos: async(req, res, next) => {
     try {
       let parametros = req.query;
       if(
@@ -696,7 +696,7 @@ export default {
         parametros.hasOwnProperty('local_codigo_origen') && parametros.hasOwnProperty('pv_afip') && parametros.hasOwnProperty('tipo_facturacion_id') &&
         parametros.hasOwnProperty('esPadre')
       ){
-        console.log("parametros: ", parametros);
+        //console.log("parametros: ", parametros);
         let peticion;
 
         if(campoNoVacio(parametros.esPadre) && !parametros.esPadre){
@@ -736,7 +736,7 @@ export default {
         message: 'Ocurrió un error al intentar obtener los locales Afip (getLocalesPadresHijos): '+error.message
       })
     }
-  },
+  },*/
   getLocalesPadres: async(req, res, next) => {
     try {
       let parametros = req.query;
@@ -747,15 +747,19 @@ export default {
         parametros.hasOwnProperty('local_codigo_origen') && parametros.hasOwnProperty('pv_afip') && parametros.hasOwnProperty('tipo_facturacion_id') &&
         parametros.hasOwnProperty('esPadre') && parametros.hasOwnProperty('nuevo')
       ){
-        console.log("padres -- parametros: ", parametros);
+        console.log("getLocalesPadres -- parametros: ", parametros);
+        
         if(parametros.nuevo == 'true'){
           parametros.nuevo = true;
         }else parametros.nuevo = false;
+        if(parametros.esPadre == 'true'){
+          parametros.esPadre = true;
+        }else parametros.esPadre = false;
+        
         let peticion;
         peticion = await localesGestion.getLocalesPadresOracle(parametros);
-        //return console.log("entro es padre");
-
         console.log("peticion: ", peticion);
+
         if(peticion.resultado == 0){
           return res.status(500).send({
             resultado: 0,
@@ -767,7 +771,6 @@ export default {
           resultado: peticion.resultado,
           locales: {
             padres: peticion.padres,
-            //hijos:  peticion.hijos
           },
           message: peticion.msj
         });
@@ -795,7 +798,7 @@ export default {
         parametros.hasOwnProperty('local_codigo_origen') && parametros.hasOwnProperty('pv_afip') && parametros.hasOwnProperty('tipo_facturacion_id') &&
         parametros.hasOwnProperty('esPadre')
       ){
-        console.log("parametros: ", parametros);
+        console.log("getLocalesHijos - parametros: ", parametros);
         let peticion;
         peticion = await localesGestion.getLocalesHijosOracle(parametros);
         console.log("entro es hijo");
@@ -835,25 +838,31 @@ export default {
     try {
       let parametros = req.body;
       if(
-        Object.keys(parametros).length == 3 &&
-        parametros.hasOwnProperty('local') && Object.keys(parametros.local).length >= 7 && 
-        parametros.local.hasOwnProperty('empresa_codigo') && parseInt(parametros.local.empresa_codigo) > 0 &&
+        Object.keys(parametros).length == 4 &&
+        parametros.hasOwnProperty('local') && (Object.keys(parametros.local).length >= 7 || Object.keys(parametros.local).length == 2) && 
+        /*parametros.local.hasOwnProperty('empresa_codigo') && parseInt(parametros.local.empresa_codigo) > 0 &&
         parametros.local.hasOwnProperty('fecha_habilitacion') && parametros.local.fecha_habilitacion &&
         parametros.local.hasOwnProperty('local_codigo_origen') && esNumeroEntero(parametros.local.local_codigo_origen) && parseInt(parametros.local.local_codigo_origen) > 0 &&
         parametros.local.hasOwnProperty('local_codigo') && esNumeroEntero(parametros.local.local_codigo) && parseInt(parametros.local.local_codigo) > 0 &&
         parametros.local.hasOwnProperty('pv_afip') && parametros.local.pv_afip.toString().length >= 1 &&
         parametros.local.hasOwnProperty('sucursal_codigo') && parseInt(parametros.local.sucursal_codigo) > 0 &&
-        parametros.local.hasOwnProperty('tipo_facturacion_codigo') && parseInt(parametros.local.tipo_facturacion_codigo) > 0 &&
+        parametros.local.hasOwnProperty('tipo_facturacion_codigo') && parseInt(parametros.local.tipo_facturacion_codigo) > 0 &&*/
         parametros.hasOwnProperty('locales_asociados') && Array.isArray(parametros.locales_asociados) &&
-        parametros.hasOwnProperty('nuevo') && (parametros.nuevo == true || parametros.nuevo == false)
+        parametros.hasOwnProperty('nuevo') && (parametros.nuevo == true || parametros.nuevo == false) &&
+        parametros.hasOwnProperty('es_padre') && (parametros.es_padre == true || parametros.es_padre == false)
       ){
         parametros.usuario = req.usuario;
         parametros.clave   = req.clave;
+
+        //return console.log("crearEditarLocalAfip - parametros: ", parametros);
+
         let peticion; 
         if(parametros.nuevo){
           peticion = await localesGestion.crearLocalAfipOracle(parametros);
         }else{
-          peticion = await localesGestion.editarLocalAfipOracle(parametros);
+          if(parametros.es_padre){
+            peticion = await localesGestion.editarLocalAfipPadreOracle(parametros);
+          }else peticion = await localesGestion.editarLocalAfipHijoOracle(parametros);
         }
         if(peticion.resultado == 0){
           return res.status(500).send({
