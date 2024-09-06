@@ -15,7 +15,11 @@ public class main {
 		/*double x0 = 1.4142135623731, h = 0.2; int m = 2;
 		System.out.println("La derivada por Richardson: "+richardson(f, x0, h, m));*/
 		
-		double i = trapecio(f,0,2,4);
+		double i; 
+		/*i = trapecio(f,0,2,4);
+		System.out.println("Trapecio: "+i);*/
+		
+		i = simpson(f,0,2,2);
 		System.out.println("Trapecio: "+i);
 	}
 	
@@ -56,7 +60,6 @@ public class main {
 		listaPtos[N-1][0] = b;		listaPtos[N-1][1] = f.evaluar2(b);
 		
 		for(int i=1; i<(N-1) ;i++) {
-			System.out.println("i: "+i+"\th: "+h+"\tacu: "+acu);
 			acu += h;
 			listaPtos[i][0] = acu;		listaPtos[i][1] = f.evaluar2(acu);
 		}
@@ -91,5 +94,29 @@ public class main {
 		return (((h/2)*(listaPtos[0][1]+listaPtos[veces][1]))+(h*acu));
 	}
 	
-	
+	public static double simpson(Funcion f, double a, double b, int veces) {
+		double h = calcularH(a, b, 2,veces), acu, acu2;
+		System.out.println("h: "+h);
+		
+		determinarListaPuntos(f, a, b, h, 2, veces);
+		
+		mostrarListaPtos((2*veces)+1);
+		
+		acu2 = 0;
+		for(int i=1; i<2*veces ;i++) {
+			if(i%2!=0) {
+				acu2 += listaPtos[i][1];	
+			}
+		}		
+		
+		acu = 0;
+		for(int i=1; i<(2*veces)-1 ;i++) {
+			if(i%2==0) {
+				acu += listaPtos[i][1];
+			}
+		}
+		
+		
+		return ((h/3)*(listaPtos[0][1] + listaPtos[veces*2][1] + 4*acu2 + 2*acu));
+	}
 }
