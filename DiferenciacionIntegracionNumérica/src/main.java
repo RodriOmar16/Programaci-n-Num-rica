@@ -1,17 +1,22 @@
 import Metodos.Funcion;
 
 public class main {
-
+	
+	public static double listaPtos[][];
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Funcion f = new Funcion();
-		f.setFuncion("atan(x)");
+		f.setFuncion("x/((x^2)+1)");
 		/*System.out.println("funcion: "+f.getFuncion());
 		f.evaluar(1.15);
 		System.out.println("f("+0+"): "+f.getResultadoFuncion());*/
 		//System.out.println("f'(x) aprox.: "+derivadaProgresiva(f, 0.6, 0.1));
-		double x0 = 1.4142135623731, h = 0.2; int m = 2;
-		System.out.println("La derivada por Richardson: "+richardson(f, x0, h, m));
+		/*double x0 = 1.4142135623731, h = 0.2; int m = 2;
+		System.out.println("La derivada por Richardson: "+richardson(f, x0, h, m));*/
+		
+		double i = trapecio(f,0,2,4);
+		System.out.println("Trapecio: "+i);
 	}
 	
 	public static double derivadaProgresiva(Funcion f,double x0, double h) {
@@ -39,5 +44,52 @@ public class main {
 		}
 		return D[m][m];
 	}
+	
+	public static double calcularH(double a, double b, int n, int m) {
+		return ((b-a)/(n*m));
+	}
+	public static void determinarListaPuntos(Funcion f, double a, double b, double h, int n, int m) {
+		int N = (n*m)+1;
+		listaPtos = new double[N][2];
+		double acu = a;
+		listaPtos[0][0] = a;		listaPtos[0][1] = f.evaluar2(a);
+		listaPtos[N-1][0] = b;		listaPtos[N-1][1] = f.evaluar2(b);
+		
+		for(int i=1; i<(N-1) ;i++) {
+			System.out.println("i: "+i+"\th: "+h+"\tacu: "+acu);
+			acu += h;
+			listaPtos[i][0] = acu;		listaPtos[i][1] = f.evaluar2(acu);
+		}
+	}
+	
+	private static void mostrarListaPtos(int n) {
+		System.out.println("Mostrar lista de puntos:");
+		for(int i=0; i<n ;i++) {
+			System.out.println("----------");
+			for(int j=0; j<2 ;j++) {
+				if(j==1) {
+					System.out.println(listaPtos[i][j]);
+				}else System.out.print(listaPtos[i][j]+" | ");
+			}
+		}
+	}
+	
+	public static double trapecio(Funcion f, double a, double b, int veces) {
+		double h = calcularH(a, b, 1,veces), acu;
+		System.out.println("h: "+h);
+		
+		determinarListaPuntos(f, a, b, h, 1, veces);
+		
+		mostrarListaPtos(veces+1);
+		
+		acu = 0;
+		
+		for(int i=1; i<veces ;i++) {
+			acu += listaPtos[i][1];
+		}
+		
+		return (((h/2)*(listaPtos[0][1]+listaPtos[veces][1]))+(h*acu));
+	}
+	
 	
 }
