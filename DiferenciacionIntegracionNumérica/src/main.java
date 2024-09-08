@@ -16,11 +16,14 @@ public class main {
 		System.out.println("La derivada por Richardson: "+richardson(f, x0, h, m));*/
 		
 		double i; 
-		/*i = trapecio(f,0,2,4);
+		/*i = trapecio(f,0,2,1);
 		System.out.println("Trapecio: "+i);*/
 		
-		i = simpson(f,0,2,2);
-		System.out.println("Trapecio: "+i);
+		/*i = simpson(f,0,2,2);
+		System.out.println("Trapecio: "+i);*/
+		i = richardsonRomberg(f,0,2,2,1);
+		System.out.println("RR: "+i);
+		
 	}
 	
 	public static double derivadaProgresiva(Funcion f,double x0, double h) {
@@ -118,5 +121,20 @@ public class main {
 		
 		
 		return ((h/3)*(listaPtos[0][1] + listaPtos[veces*2][1] + 4*acu2 + 2*acu));
+	}
+	
+	public static double richardsonRomberg(Funcion f, double a, double b, int m, int metodo) {
+		double D[][] = new double[m+1][m+1];
+		
+		D[0][0] = metodo == 1 ? trapecio(f,a,b,1) : simpson(f,a,b,1) ; 
+		
+		for(int n=1; n<=m ;n++) {
+			D[n][0] = metodo == 1 ? trapecio(f,a,b,(int)Math.pow(2, n)) : simpson(f,a,b,(int)Math.pow(2, n)) ; 
+			
+			for(int k=1; k<=n ;k++) {
+				D[n][k] = D[n][k-1] + (D[n][k-1] - D[n-1][k-1])/((Math.pow(4, (metodo == 1 ? k : (k+1))))-1);
+			}
+		}
+		return D[m][m];
 	}
 }
