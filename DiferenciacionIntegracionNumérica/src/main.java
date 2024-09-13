@@ -21,7 +21,7 @@ public class main {
 		
 		/*i = simpson(f,0,2,2);
 		System.out.println("Trapecio: "+i);*/
-		i = richardsonRomberg(f,0,2,2,1);
+		i = richardsonRomberg(f,0,2,4,1);
 		System.out.println("RR: "+i);
 		
 	}
