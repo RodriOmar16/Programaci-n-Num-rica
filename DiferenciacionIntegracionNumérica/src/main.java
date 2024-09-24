@@ -7,22 +7,22 @@ public class main {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Funcion f = new Funcion();
-		f.setFuncion("x/((x^2)+1)");
+		f.setFuncion("4*sin(x)*cos(x)");
 		/*System.out.println("funcion: "+f.getFuncion());
 		f.evaluar(1.15);
 		System.out.println("f("+0+"): "+f.getResultadoFuncion());*/
-		//System.out.println("f'(x) aprox.: "+derivadaProgresiva(f, 0.6, 0.1));
-		/*double x0 = 1.4142135623731, h = 0.2; int m = 2;
-		System.out.println("La derivada por Richardson: "+richardson(f, x0, h, m));*/
+		System.out.println("f'(x) aprox.: "+derivadaCentrada(f,1.5707963267949, 1));
+		double x0 = 1.5707963267949, h = 1; int m = 2;
+		System.out.println("La derivada por Richardson: "+richardson(f, x0, h, m));
 		
-		double i; 
+		//double i; 
 		/*i = trapecio(f,0,2,1);
 		System.out.println("Trapecio: "+i);*/
 		
 		/*i = simpson(f,0,2,2);
 		System.out.println("Trapecio: "+i);*/
-		i = richardsonRomberg(f,0,2,4,1);
-		System.out.println("RR: "+i);
+		/*i = richardsonRomberg(f,0,2,4,1);
+		System.out.println("RR: "+i);*/
 		
 	}
 	
@@ -42,11 +42,13 @@ public class main {
 		double D[][] = new double[m+1][m+1];
 		
 		D[0][0] = derivadaCentrada(f,x0,h);
+		System.out.println("D[0][0]: "+D[0][0]);
 		for(int n=1; n<=m ;n++) {
 			D[n][0] = derivadaCentrada(f,x0, (h/Math.pow(2, n)));
-			
+			System.out.println("D["+n+"][0]: "+D[n][0]);
 			for(int k=1; k<=n ;k++) {
 				D[n][k] = D[n][k-1] + (D[n][k-1] - D[n-1][k-1])/((Math.pow(4, k))-1);
+				System.out.println("D["+n+"]["+k+"]: "+D[n][k]);
 			}
 		}
 		return D[m][m];
